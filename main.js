@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { createServer, STATUS_CODES } from 'node:http';
 import { verify } from 'node:crypto';
 import { db, got, oauthVerify } from './src/util.js';
-import { buttons } from './src/buttons.js';
+import { buttons } from './src/index.js';
 
 
 /** @type {{id:String,name:String,url:String}[]} */
@@ -45,7 +45,6 @@ const server = createServer( (req, res) => {
 		} );
 		return req.on( 'end', async () => {
 			var rawBody = Buffer.concat(body).toString();
-			console.log(rawBody)
 			let signature = req.headers['x-signature-ed25519'];
 			let timestamp = req.headers['x-signature-timestamp'];
 			if ( req.headers.authorization !== process.env.token && ( !process.env.key || !signature || !timestamp
@@ -68,6 +67,9 @@ const server = createServer( (req, res) => {
 					case 1:
 						result.type = 1;
 						break;
+					case 5:
+						await buttons(interaction, result);
+						break;
 					case 3:
 						if ( interaction.data?.component_type === 2 ) {
 							await buttons(interaction, result);
@@ -79,6 +81,7 @@ const server = createServer( (req, res) => {
 				}
 				let response = JSON.stringify(result);
 				if ( req.headers.authorization === process.env.token ) {
+					if ( result.data?.custom_id ) result.data.custom_id = `rc_${result.data.custom_id}`;
 					got.post( `https://discord.com/api/v10/interactions/${interaction.id}/${interaction.token}/callback`, {
 						json: result
 					} ).catch( error => {

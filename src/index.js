@@ -6,8 +6,9 @@ export async function buttons(interaction, result) {
 	var parts = interaction.data.custom_id.split(' ');
 	var hostname = interaction.message?.embeds?.[0]?.url?.split('/')[2];
 	if ( !hostname ) hostname = interaction.message?.content?.match?.(/\]\(<https:\/\/([^\/<>\[\]() ]+)\/[^<> ]+>\)/)?.[1];
+	if ( !hostname ) hostname = interaction.message?.embeds?.[0]?.description?.match?.(/\]\(<https:\/\/([^\/<>\[\]() ]+)\/[^<> ]+>\)/)?.[1];
 	var userId = interaction.member?.user?.id;
-	if ( !hostname || !userId || !parts[0].startsWith( '/' ) || !parts[0].endsWith( '/' ) ) {
+	if ( !hostname || !userId || !parts[0].startsWith( '/' ) || !parts[0].endsWith( '/' ) || !api.allowedAction.includes( parts[1] ) || !/^\d+$/.test(parts[2]) ) {
 		result.type = 4;
 		result.data.content = 'Error: Modified message!';
 		return;
@@ -21,6 +22,27 @@ export async function buttons(interaction, result) {
 	if ( !process.env[`oauth_${oauthKey}`] || !process.env[`oauth_${oauthKey}_secret`] ) {
 		result.type = 4;
 		result.data.content = 'Error: Site not supported!';
+		return;
+	}
+	if ( interaction.type !== 5 ) {
+		result.type = 9;
+		result.data = {
+			custom_id: interaction.data.custom_id,
+			title: parts[1],
+			components: [{
+				type: 1,
+				components: [{
+					type: 4,
+					custom_id: 'reason',
+					style: 1,
+					label: 'Reason',
+					min_length: 0,
+					max_length: 500,
+					required: false,
+					placeholder: ( api.autocommentAction.includes( parts[1] ) ? '(default auto generated reason)' : '' )
+				}]
+			}]
+		};
 		return;
 	}
 	result.type = 5;
@@ -70,5 +92,40 @@ export async function buttons(interaction, result) {
 }
 
 async function actions(interaction, context) {
-
+	var parts = interaction.data.custom_id.split(' ');
+	var reason = interaction.data.components?.find( row => {
+		return row.components?.find?.( component => component.custom_id === 'reason' );
+	} )?.components.find( component => component.custom_id === 'reason' )?.value || '';
+	switch ( parts[1] ) {
+		case 'block':
+			api.block(context, `#${parts[2]}`, reason);
+			break;
+		case 'delete':
+			api.delete(context, parts[2], reason);
+			break;
+		case 'move':
+			api.move(context, parts[2], parts.slice(3).join(' '), reason);
+			break;
+		case 'file':
+			api.filerevert(context, parts[2], parts.slice(3).join(' '), reason);
+			break;
+		case 'rollback':
+			if ( /^\d+$/.test(parts[3]) ) {
+				api.rollback(context, parts[2], `#${parts[3]}`, reason);
+				break;
+			}
+		case 'undo':
+			if ( /^\d+$/.test(parts[3]) ) {
+				api.undo(context, parts[2], parts[3], reason);
+				break;
+			}
+		default:
+			reply(interaction, {
+				content: 'Error: Modified message!',
+				flags: 1 << 6,
+				allowed_mentions: {
+					parse: []
+				}
+			})
+	}
 }

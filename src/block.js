@@ -4,16 +4,17 @@ import { getToken } from './token.js';
 /** 
  * @param {Context} context
  * @param {String} pageid
+ * @param {String} [reason]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<Boolean>}
  */
-export async function blockUser(context, user, forceRefresh = false) {
+export async function blockUser(context, user, reason = '', forceRefresh = false) {
 	let tokens = await getToken(context, 'csrf', forceRefresh);
 	if ( !tokens ) return false;
 	return got.post( `${context.wiki}api.php`, {
 		form: {
 			action: 'block', user,
-			reason: '', expiry: 'never',
+			reason, expiry: 'never',
 			nocreate: true, autoblock: true,
 			token: tokens.csrftoken,
 			assert: 'user', errorformat: 'plaintext',
@@ -27,13 +28,12 @@ export async function blockUser(context, user, forceRefresh = false) {
 		if ( response.statusCode !== 200 || !body?.block?.id ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh() ) {
-					return blockUser(context, user, true);
+					return blockUser(context, user, reason, true);
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
-					return blockUser(context, user, true);
+					return blockUser(context, user, reason, true);
 				}
 				if ( body.errors.some( error => error.code === 'alreadyblocked' ) ) {
-					return false;
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while blocking the user: ${parseErrors(response)}` );

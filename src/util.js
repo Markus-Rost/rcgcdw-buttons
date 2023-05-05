@@ -80,7 +80,7 @@ export class Context {
 			form: {
 				grant_type: 'refresh_token',
 				refresh_token: this.refreshToken,
-				redirect_uri: new URL('/oauth/mw', process.env.dashboard).href,
+				redirect_uri: new URL('/oauth', process.env.dashboard).href,
 				client_id: process.env[`oauth_${this.site}`],
 				client_secret: process.env[`oauth_${this.site}_secret`]
 			}

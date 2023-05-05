@@ -3,19 +3,19 @@ import { getToken } from './token.js';
 
 /** 
  * @param {Context} context
- * @param {String} timestamp
- * @param {String} filename
- * @param {String} [comment]
+ * @param {String} fromid
+ * @param {String} to
+ * @param {String} [reason]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<Boolean>}
  */
-export async function revertFile(context, timestamp, filename, comment = '', forceRefresh = false) {
+export async function movePage(context, fromid, to, reason = '', forceRefresh = false) {
 	let tokens = await getToken(context, 'csrf', forceRefresh);
 	if ( !tokens ) return false;
 	return got.post( `${context.wiki}api.php`, {
 		form: {
-			action: 'filerevert', comment, filename,
-			archivename: `${timestamp}!${filename}`,
+			action: 'move', fromid, to,
+			reason, noredirect: true,
 			token: tokens.csrftoken,
 			assert: 'user', errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
@@ -25,24 +25,24 @@ export async function revertFile(context, timestamp, filename, comment = '', for
 		}
 	} ).then( async response => {
 		var body = response.body;
-		if ( response.statusCode !== 200 || body?.filerevert?.result !== 'Success' ) {
+		if ( response.statusCode !== 200 || !body?.move?.to ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh() ) {
-					return revertFile(context, timestamp, filename, comment, true);
+					return movePage(context, fromid, to, reason, true);
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
-					return revertFile(context, timestamp, filename, comment, true);
+					return movePage(context, fromid, to, reason, true);
 				}
-				if ( body.errors.some( error => error.code === 'filerevert-badversion' ) ) {
+				if ( body.errors.some( error => error.code === 'selfmove' ) ) {
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while reverting the file: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while moving the page: ${parseErrors(response)}` );
 			return false;
 		}
-		console.log( `- Reverted ${context.wiki}/wiki/File:${filename}` );
+		console.log( `- Moved ${body.move.from} to ${context.wiki}/wiki/${body.move.to}` );
 		return true;
 	}, error => {
-		console.log( `- Error while reverting the file: ${error}` );
+		console.log( `- Error while moving the page: ${error}` );
 		return false;
 	} );
 }
