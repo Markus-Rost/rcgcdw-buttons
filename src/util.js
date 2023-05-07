@@ -31,6 +31,27 @@ export const got = gotDefault.extend( {
 	responseType: 'json'
 }, gotSsrf );
 
+/** @type {Map<String, {id: String, url: String}>} */
+export const enabledOAuth2 = new Map();
+if ( process.env.oauth_wikimedia && process.env.oauth_wikimedia_secret ) {
+	enabledOAuth2.set('wikimedia', {
+		id: 'wikimedia',
+		url: 'https://meta.wikimedia.org/w/'
+	});
+}
+if ( process.env.oauth_miraheze && process.env.oauth_miraheze_secret ) {
+	enabledOAuth2.set('miraheze', {
+		id: 'miraheze',
+		url: 'https://meta.miraheze.org/w/'
+	});
+}
+if ( process.env.oauth_wikiforge && process.env.oauth_wikiforge_secret ) {
+	enabledOAuth2.set('wikiforge', {
+		id: 'wikiforge',
+		url: 'https://meta.wikiforge.net/w/'
+	});
+}
+
 /** @type {Map<String, {userId: String, interaction: Object}>} */
 export const oauthVerify = new Map();
 
@@ -78,7 +99,7 @@ export class Context {
 			form: {
 				grant_type: 'refresh_token',
 				refresh_token: this.refreshToken,
-				redirect_uri: new URL('/oauth', process.env.dashboard).href,
+				redirect_uri: process.env.dashboard,
 				client_id: process.env[`oauth_${this.site}`],
 				client_secret: process.env[`oauth_${this.site}_secret`]
 			}
@@ -91,6 +112,7 @@ export class Context {
 				}, dberror => {
 					console.log( `- Error while deleting the OAuth2 token for ${this.userId} on ${this.site}: ${dberror}` );
 				} );
+				contextCache.delete(`${this.userId} ${this.site}`);
 				return false;
 			}
 			this.accessToken = body.access_token;

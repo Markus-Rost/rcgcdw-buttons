@@ -1,30 +1,8 @@
 import 'dotenv/config';
 import { createServer, STATUS_CODES } from 'node:http';
 import { verify } from 'node:crypto';
-import { db, got, oauthVerify } from './src/util.js';
+import { db, got, enabledOAuth2, oauthVerify } from './src/util.js';
 import { buttons } from './src/index.js';
-
-
-/** @type {{id: String, url: String}[]} */
-const enabledOAuth2 = [];
-if ( process.env.oauth_wikimedia && process.env.oauth_wikimedia_secret ) {
-	enabledOAuth2.push({
-		id: 'wikimedia',
-		url: 'https://meta.wikimedia.org/w/'
-	});
-}
-if ( process.env.oauth_miraheze && process.env.oauth_miraheze_secret ) {
-	enabledOAuth2.push({
-		id: 'miraheze',
-		url: 'https://meta.miraheze.org/w/'
-	});
-}
-if ( process.env.oauth_wikiforge && process.env.oauth_wikiforge_secret ) {
-	enabledOAuth2.push({
-		id: 'wikiforge',
-		url: 'https://meta.wikiforge.net/w/'
-	});
-}
 
 const server = createServer( (req, res) => {
 	res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -118,16 +96,19 @@ const server = createServer( (req, res) => {
 			return res.end();
 		}
 		let state = reqURL.searchParams.get('state');
-		let oauthSite = enabledOAuth2.find( oauthSite => state.split(' ')[0] === oauthSite.id );
+		let site = state.split(' ');
+		let oauthSite = enabledOAuth2.get(site[0]);
 		if ( !oauthSite || !oauthVerify.has(state) ) {
 			res.writeHead(302, {Location: '/?oauth=failed'});
 			return res.end();
 		}
-		return got.post( `${oauthSite.url}rest.php/oauth2/access_token`, {
+		let url = oauthSite.url;
+		if ( new RegExp( `^https://[a-z0-9\\.-]*\\b${oauthSite.id}\\b.*/$` ).test(site[2]) ) url = site[2];
+		return got.post( `${url}rest.php/oauth2/access_token`, {
 			form: {
 				grant_type: 'authorization_code',
 				code: reqURL.searchParams.get('code'),
-				redirect_uri: new URL('/oauth', process.env.dashboard).href,
+				redirect_uri: process.env.dashboard,
 				client_id: process.env[`oauth_${oauthSite.id}`],
 				client_secret: process.env[`oauth_${oauthSite.id}_secret`]
 			}
@@ -141,11 +122,11 @@ const server = createServer( (req, res) => {
 			let data = oauthVerify.get(state);
 			db.query( 'INSERT INTO oauthrevert(userid, site, access, refresh) VALUES ($1, $2, $3, $4)', [data.userId, oauthSite.id, body.access_token, body.refresh_token] ).then( () => {
 				console.log( `- RcGcDw buttons: OAuth2 token for ${data.userId} on ${oauthSite.id} successfully saved.` );
+				buttons(data.interaction);
 			}, dberror => {
 				console.log( `- RcGcDw buttons: Error while saving the OAuth2 token for ${data.userId} on ${oauthSite.id}: ${dberror}` );
 			} );
 			oauthVerify.delete(state);
-			buttons(data.interaction);
 			res.writeHead(302, {Location: '/?oauth=success'});
 			return res.end();
 		}, error => {

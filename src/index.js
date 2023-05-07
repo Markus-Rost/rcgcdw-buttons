@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { db, oauthVerify, Context, reply } from './util.js';
+import { db, enabledOAuth2, oauthVerify, Context, reply } from './util.js';
 import * as api from './api.js';
 
 export async function buttons(interaction, result = {data: {}}) {
@@ -26,7 +26,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		oauthSite = 'wikiforge';
 		parts[0] = '/w/';
 	}
-	if ( !oauthSite || !process.env[`oauth_${oauthSite}`] || !process.env[`oauth_${oauthSite}_secret`] ) {
+	if ( !enabledOAuth2.has(oauthSite) ) {
 		result.type = 4;
 		result.data.content = 'Error: Site not supported!';
 		return;
@@ -86,14 +86,15 @@ export async function buttons(interaction, result = {data: {}}) {
 		console.log( `- Error while getting the OAuth2 token: ${dberror}` );
 		return Promise.reject();
 	} ).catch( () => {
-		let state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')}`;
+		let state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')} ${wiki}`;
 		while ( oauthVerify.has(state) ) {
-			state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')}`;
+			state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')} ${wiki}`;
 		}
 		oauthVerify.set(state, {userId, interaction});
 		let oauthURL = `${wiki}rest.php/oauth2/authorize?` + new URLSearchParams({
-			response_type: 'code', redirect_uri: new URL('/oauth', process.env.dashboard).href,
-			client_id: process.env[`oauth_${oauthSite}`], state
+			response_type: 'code', state,
+			redirect_uri: process.env.dashboard,
+			client_id: process.env[`oauth_${oauthSite}`]
 		}).toString();
 		let message = {
 			content: `[Please authorize me to make changes on the wiki in your name!](<${oauthURL}>)`,
