@@ -4,6 +4,8 @@ import { subtle } from 'node:crypto';
 import { db, got, enabledOAuth2, oauthVerify } from './src/util.js';
 import { buttons } from './src/index.js';
 
+const PUBLIC_KEY = subtle.importKey('raw', Buffer.from(process.env.key, 'hex'), 'Ed25519', true, ['verify']);
+
 const server = createServer( (req, res) => {
 	res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 	res.setHeader('Content-Type', 'text/html');
@@ -26,7 +28,7 @@ const server = createServer( (req, res) => {
 				console.log(signature)
 				console.log(timestamp)
 				if ( req.headers.authorization !== process.env.token && ( !process.env.key || !signature || !timestamp
-				 || !await subtle.verify('Ed25519', Buffer.from(process.env.key, 'hex'), Buffer.from(signature, 'hex'), Buffer.from(timestamp + rawBody)) ) ) {
+				 || !await subtle.verify('Ed25519', await PUBLIC_KEY, Buffer.from(signature, 'hex'), Buffer.from(timestamp + rawBody)) ) ) {
 					res.statusCode = 401;
 					return res.end();
 				}
