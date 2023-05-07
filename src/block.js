@@ -2,16 +2,17 @@ import { got, Context, parseErrors } from './util.js';
 import { getToken } from './token.js';
 
 /** 
+ * @param {String} wiki
  * @param {Context} context
  * @param {String} pageid
  * @param {String} [reason]
  * @param {Boolean} [forceRefresh]
- * @returns {Promise<Boolean>}
+ * @returns {Promise<String>}
  */
-export async function blockUser(context, user, reason = '', forceRefresh = false) {
-	let tokens = await getToken(context, 'csrf', forceRefresh);
-	if ( !tokens ) return false;
-	return got.post( `${context.wiki}api.php`, {
+export async function blockUser(wiki, context, user, reason = '', forceRefresh = false) {
+	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
+	if ( !tokens ) return 'Error: I ran into an error while trying to block the user!';
+	return got.post( `${wiki}api.php`, {
 		form: {
 			action: 'block', user,
 			reason, expiry: 'never',
@@ -27,22 +28,26 @@ export async function blockUser(context, user, reason = '', forceRefresh = false
 		var body = response.body;
 		if ( response.statusCode !== 200 || !body?.block?.id ) {
 			if ( body?.errors?.length ) {
-				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh() ) {
-					return blockUser(context, user, reason, true);
+				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
+					return blockUser(wiki, context, user, reason, true);
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
-					return blockUser(context, user, reason, true);
+					return blockUser(wiki, context, user, reason, true);
 				}
 				if ( body.errors.some( error => error.code === 'alreadyblocked' ) ) {
+					return 'Error: The user is already blocked!';
+				}
+				if ( body.errors.some( error => ['permissiondenied', 'cantblock'].includes( error.code ) ) ) {
+					return 'Error: You don\'t have the permission for this action!';
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while blocking the user: ${parseErrors(response)}` );
-			return false;
+			return 'Error: I ran into an error while trying to block the user!';
 		}
-		console.log( `- Blocked ${context.wiki}/wiki/User:${body.block.user}` );
-		return true;
+		console.log( `- Blocked ${body.block.user} on ${wiki}` );
+		return 'Success: The user has been blocked!';
 	}, error => {
 		console.log( `- Error while blocking the user: ${error}` );
-		return false;
+		return 'Error: I ran into an error while trying to block the user!';
 	} );
 }

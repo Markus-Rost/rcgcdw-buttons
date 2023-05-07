@@ -31,20 +31,19 @@ export const got = gotDefault.extend( {
 	responseType: 'json'
 }, gotSsrf );
 
-/** @type {Map<String, String>} */
+/** @type {Map<String, {userId: String, interaction: Object}>} */
 export const oauthVerify = new Map();
 
 /** @type {Map<String, Context>} */
 const contextCache = new Map();
 
 /**
- * Context for a wiki and user.
+ * Context for a site and user.
  * @class Context
  */
 export class Context {
 	/**
 	 * Creates a context.
-	 * @param {String} wiki - The wiki script path.
 	 * @param {Object} row - The database row.
 	 * @param {String} row.access - The authorization token.
 	 * @param {String} row.refresh - The refresh token.
@@ -52,13 +51,11 @@ export class Context {
 	 * @param {String} row.site - The OAuth site.
 	 * @constructs Context
 	 */
-	constructor(wiki, row) {
-		let cacheKey = `${wiki} ${row.userid} ${row.site}`;
+	constructor(row) {
+		let cacheKey = `${row.userid} ${row.site}`;
 		if ( contextCache.has(cacheKey) ) {
 			return contextCache.get(cacheKey);
 		}
-		/** @type {String} */
-		this.wiki = wiki;
 		/** @type {String} */
 		this.accessToken = row.access;
 		/** @type {String} */
@@ -72,11 +69,12 @@ export class Context {
 
 	/**
 	 * Refreshes the context tokens.
+	 * @param {String} wiki
 	 * @returns {Promise<Boolean>}
 	 */
-	async refresh() {
+	async refresh(wiki) {
 		if ( !process.env[`oauth_${this.site}`] && !process.env[`oauth_${this.site}_secret`] ) return false;
-		return got.post( `${this.wiki}rest.php/oauth2/access_token`, {
+		return got.post( `${wiki}rest.php/oauth2/access_token`, {
 			form: {
 				grant_type: 'refresh_token',
 				refresh_token: this.refreshToken,
@@ -88,6 +86,11 @@ export class Context {
 			var body = response.body;
 			if ( response.statusCode !== 200 || !body?.access_token ) {
 				console.log( `- ${response.statusCode}: Error while refreshing the mediawiki token: ${body?.message||body?.error}` );
+				db.query( 'DELETE FROM oauthrevert WHERE userid = $1 AND site = $2', [this.userId, this.site] ).then( () => {
+					console.log( `- OAuth2 token for ${this.userId} on ${this.site} successfully deleted.` );
+				}, dberror => {
+					console.log( `- Error while deleting the OAuth2 token for ${this.userId} on ${this.site}: ${dberror}` );
+				} );
 				return false;
 			}
 			this.accessToken = body.access_token;
@@ -110,6 +113,7 @@ export class Context {
 }
 
 export function reply(interaction, message) {
+	if ( !message.components ) message.components = [];
 	got.patch( `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
 		json: message
 	} ).catch( error => {
@@ -123,6 +127,6 @@ export function reply(interaction, message) {
  */
 export function parseErrors(response) {
 	let error = response?.body?.errors?.map( error => `${error.code}: ${error.text}` ).join(' - ');
-	if ( !error ) error = response?.headers?.['MediaWiki-API-Error'] || response?.statusMessage;
+	if ( !error ) error = response?.headers?.['mediawiki-api-error'] || response?.statusMessage;
 	return error || '';
 }

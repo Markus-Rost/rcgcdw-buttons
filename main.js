@@ -5,26 +5,23 @@ import { db, got, oauthVerify } from './src/util.js';
 import { buttons } from './src/index.js';
 
 
-/** @type {{id:String,name:String,url:String}[]} */
+/** @type {{id: String, url: String}[]} */
 const enabledOAuth2 = [];
 if ( process.env.oauth_wikimedia && process.env.oauth_wikimedia_secret ) {
 	enabledOAuth2.push({
 		id: 'wikimedia',
-		name: 'Wikimedia (Wikipedia)',
 		url: 'https://meta.wikimedia.org/w/'
 	});
 }
 if ( process.env.oauth_miraheze && process.env.oauth_miraheze_secret ) {
 	enabledOAuth2.push({
 		id: 'miraheze',
-		name: 'Miraheze',
 		url: 'https://meta.miraheze.org/w/'
 	});
 }
 if ( process.env.oauth_wikiforge && process.env.oauth_wikiforge_secret ) {
 	enabledOAuth2.push({
 		id: 'wikiforge',
-		name: 'WikiForge',
 		url: 'https://meta.wikiforge.net/w/'
 	});
 }
@@ -121,15 +118,12 @@ const server = createServer( (req, res) => {
 			return res.end();
 		}
 		let state = reqURL.searchParams.get('state');
-		let site = state.split(' ');
-		let oauthSite = enabledOAuth2.find( oauthSite => ( site[2] || site[0] ) === oauthSite.id );
+		let oauthSite = enabledOAuth2.find( oauthSite => state.split(' ')[0] === oauthSite.id );
 		if ( !oauthSite || !oauthVerify.has(state) ) {
 			res.writeHead(302, {Location: '/?oauth=failed'});
 			return res.end();
 		}
-		let url = oauthSite.url;
-		if ( oauthVerify.has(state) && site[2] === oauthSite.id ) url = 'https://' + site[0] + '/';
-		return got.post( `${url}rest.php/oauth2/access_token`, {
+		return got.post( `${oauthSite.url}rest.php/oauth2/access_token`, {
 			form: {
 				grant_type: 'authorization_code',
 				code: reqURL.searchParams.get('code'),
@@ -144,13 +138,14 @@ const server = createServer( (req, res) => {
 				res.writeHead(302, {Location: '/?oauth=failed'});
 				return res.end();
 			}
-			let userId = oauthVerify.get(state);
-			db.query( 'INSERT INTO oauthrevert(userid, site, access, refresh) VALUES ($1, $2, $3, $4)', [userId, oauthSite.id, body.access_token, body.refresh_token] ).then( () => {
-				console.log( `- RcGcDw buttons: OAuth2 token for ${userId} on ${oauthSite.id} successfully saved.` );
+			let data = oauthVerify.get(state);
+			db.query( 'INSERT INTO oauthrevert(userid, site, access, refresh) VALUES ($1, $2, $3, $4)', [data.userId, oauthSite.id, body.access_token, body.refresh_token] ).then( () => {
+				console.log( `- RcGcDw buttons: OAuth2 token for ${data.userId} on ${oauthSite.id} successfully saved.` );
 			}, dberror => {
-				console.log( `- RcGcDw buttons: Error while saving the OAuth2 token for ${userId} on ${oauthSite.id}: ${dberror}` );
+				console.log( `- RcGcDw buttons: Error while saving the OAuth2 token for ${data.userId} on ${oauthSite.id}: ${dberror}` );
 			} );
 			oauthVerify.delete(state);
+			buttons(data.interaction);
 			res.writeHead(302, {Location: '/?oauth=success'});
 			return res.end();
 		}, error => {
@@ -160,18 +155,6 @@ const server = createServer( (req, res) => {
 		} );
 	}
 	else {
-		/*
-		let state = `meta.miraheze.org/w ${Date.now().toString(16)}${randomBytes(16).toString('hex')} miraheze`;
-		while ( oauthVerify.has(state) ) {
-			state = `meta.miraheze.org/w ${Date.now().toString(16)}${randomBytes(16).toString('hex')} miraheze`;
-		}
-		oauthVerify.set(state, USERID);
-		let oauthURL = 'https://meta.miraheze.org/w/rest.php/oauth2/authorize?' + new URLSearchParams({
-			response_type: 'code', redirect_uri: new URL('/oauth', process.env.dashboard).href,
-			client_id: process.env['oauth_miraheze'], state
-		}).toString();
-		let body = `<a href="${oauthURL}">${oauthURL}</a>`;
-		*/
 		let body = 'Hi';
 		res.writeHead(200, {
 			'Content-Length': Buffer.byteLength(body)
@@ -181,8 +164,8 @@ const server = createServer( (req, res) => {
 	}
 } );
 
-server.listen( 8000, 'localhost', () => {
-	console.log( '- RcGcDw buttons: Server running at http://localhost:8000/' );
+server.listen( 8800, 'localhost', () => {
+	console.log( '- RcGcDw buttons: Server running at http://localhost:8800/' );
 } );
 
 /**
