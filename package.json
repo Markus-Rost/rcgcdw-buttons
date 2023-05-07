@@ -11,7 +11,7 @@
   "author": "MarkusRost",
   "license": "ISC",
   "engines": {
-    "node": ">=18.1.0"
+    "node": ">=18.15.0"
   },
   "dependencies": {
     "dotenv": "^16.0.3",

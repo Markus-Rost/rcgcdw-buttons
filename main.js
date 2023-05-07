@@ -4,7 +4,14 @@ import { subtle } from 'node:crypto';
 import { db, got, enabledOAuth2, oauthVerify } from './src/util.js';
 import { buttons } from './src/index.js';
 
-const PUBLIC_KEY = subtle.importKey('raw', Buffer.from(process.env.key, 'hex'), 'Ed25519', true, ['verify']);
+const PUBLIC_KEY = ( process.env.key ? await subtle.importKey('raw', Buffer.from(process.env.key, 'hex'), 'Ed25519', true, ['verify']).catch(console.log) : null );
+
+const oauthURL = `https://discord.com/oauth2/authorize?` + new URLSearchParams({
+	response_type: 'code',
+	scope: 'webhook.incoming',
+	client_id: process.env.bot,
+	redirect_uri: process.env.webhook
+}).toString();
 
 const server = createServer( (req, res) => {
 	res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -25,10 +32,8 @@ const server = createServer( (req, res) => {
 			try {
 				let signature = req.headers['x-signature-ed25519'];
 				let timestamp = req.headers['x-signature-timestamp'];
-				console.log(signature)
-				console.log(timestamp)
-				if ( req.headers.authorization !== process.env.token && ( !process.env.key || !signature || !timestamp
-				 || !await subtle.verify('Ed25519', await PUBLIC_KEY, Buffer.from(signature, 'hex'), Buffer.from(timestamp + rawBody)) ) ) {
+				if ( req.headers.authorization !== process.env.token && ( !PUBLIC_KEY || !signature || !timestamp
+				 || !await subtle.verify('Ed25519', PUBLIC_KEY, Buffer.from(signature, 'hex'), Buffer.from(timestamp + rawBody)) ) ) {
 					res.statusCode = 401;
 					return res.end();
 				}
@@ -146,18 +151,47 @@ const server = createServer( (req, res) => {
 			return res.end();
 		} );
 	}
-	else {
-		let body = 'Hi';
-		res.writeHead(200, {
-			'Content-Length': Buffer.byteLength(body)
-		});
-		res.write( body );
+
+	if ( !reqURL.searchParams.get('code') || !reqURL.searchParams.get('guild_id') ) {
+		res.writeHead(302, {Location: oauthURL});
 		return res.end();
 	}
+	return got.post( 'https://discord.com/api/oauth2/token', {
+		form: {
+			grant_type: 'authorization_code',
+			code: reqURL.searchParams.get('code'),
+			redirect_uri: process.env.webhook,
+			client_id: process.env.bot,
+			client_secret: process.env.secret
+		}
+	} ).then( response => {
+		var body = response.body;
+		if ( response.statusCode !== 200 || !body?.webhook?.url || body.webhook.guild_id !== reqURL.searchParams.get('guild_id') ) {
+			console.log( `- RcGcDw buttons: ${response.statusCode}: Error while getting the webhook url: ${body?.message||body?.error}` );
+			res.writeHead(302, {Location: oauthURL});
+			return res.end();
+		}
+		console.log( '- RcGcDw buttons: Webhook successfully created!' );
+		let text = `<body style="display: flex; justify-content: center; align-items: center;"><code style="user-select: all;">${body.webhook.url}</code></body>`;
+		res.writeHead(200, {
+			'Content-Length': Buffer.byteLength(text)
+		});
+		res.write( text );
+		return res.end();
+	}, error => {
+		console.log( `- RcGcDw buttons: Error while getting the webhook url: ${error}` );
+		res.writeHead(302, {Location: oauthURL});
+		return res.end();
+	} );
 } );
 
 server.listen( 8800, 'localhost', () => {
 	console.log( '- RcGcDw buttons: Server running at http://localhost:8800/' );
+} );
+
+process.on( 'warning', warning => {
+	if ( warning?.name === 'ExperimentalWarning' ) return;
+	console.log(`- Warning: ${warning}`);
 } );
 
 /**
