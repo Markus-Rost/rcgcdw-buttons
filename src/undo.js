@@ -51,7 +51,7 @@ export async function undoPage(wiki, context, pageid, undo, summary = '', forceR
 			console.log( `- ${response.statusCode}: Error while undoing the edit: ${parseErrors(response)}` );
 			return 'Error: I ran into an error while trying to undo the edit!';
 		}
-		console.log( `- Undid r${undo} on ${body.edit.title} of ${wiki}` );
+		console.log( `${wiki} - Undid r${undo} on ${body.edit.title}` );
 		return 'Success: The edit has been undone!';
 	}, error => {
 		console.log( `- Error while undoing the edit: ${error}` );

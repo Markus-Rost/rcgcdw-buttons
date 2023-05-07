@@ -20,10 +20,17 @@ const server = createServer( (req, res) => {
 		} );
 		return req.on( 'end', async () => {
 			var rawBody = Buffer.concat(body).toString();
-			let signature = req.headers['x-signature-ed25519'];
-			let timestamp = req.headers['x-signature-timestamp'];
-			if ( req.headers.authorization !== process.env.token && ( !process.env.key || !signature || !timestamp
-			 || !verify(null, Buffer.from(timestamp + rawBody), Buffer.from(process.env.key, 'hex'), Buffer.from(signature, 'hex')) ) ) {
+			try {
+				let signature = req.headers['x-signature-ed25519'];
+				let timestamp = req.headers['x-signature-timestamp'];
+				if ( req.headers.authorization !== process.env.token && ( !process.env.key || !signature || !timestamp
+				 || !verify('Ed25519', Buffer.from(timestamp + rawBody), Buffer.from(process.env.key, 'hex'), Buffer.from(signature, 'hex')) ) ) {
+					res.statusCode = 401;
+					return res.end();
+				}
+			}
+			catch ( verifyerror ) {
+				console.log( verifyerror );
 				res.statusCode = 401;
 				return res.end();
 			}

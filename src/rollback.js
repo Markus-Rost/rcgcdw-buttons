@@ -47,7 +47,7 @@ export async function rollbackPage(wiki, context, pageid, user, summary = '', fo
 			console.log( `- ${response.statusCode}: Error while reverting the page: ${parseErrors(response)}` );
 			return 'Error: I ran into an error while trying to rollback the page!';
 		}
-		console.log( `- Reverted ${user} on ${body.rollback.title} of ${wiki}` );
+		console.log( `${wiki} - Reverted ${user} on ${body.rollback.title}` );
 		return 'Success: The page has been rolled back!';
 	}, error => {
 		console.log( `- Error while reverting the page: ${error}` );

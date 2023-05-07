@@ -47,7 +47,7 @@ export async function movePage(wiki, context, fromid, to, reason = '', forceRefr
 			console.log( `- ${response.statusCode}: Error while moving the page: ${parseErrors(response)}` );
 			return 'Error: I ran into an error while trying to move the page back!';
 		}
-		console.log( `- Moved ${body.move.from} to ${body.move.to} on ${wiki}` );
+		console.log( `${wiki} - Moved ${body.move.from} to ${body.move.to}` );
 		return 'Success: The page has been moved back!';
 	}, error => {
 		console.log( `- Error while moving the page: ${error}` );

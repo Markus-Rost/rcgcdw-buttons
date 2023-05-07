@@ -44,7 +44,7 @@ export async function blockUser(wiki, context, user, reason = '', forceRefresh =
 			console.log( `- ${response.statusCode}: Error while blocking the user: ${parseErrors(response)}` );
 			return 'Error: I ran into an error while trying to block the user!';
 		}
-		console.log( `- Blocked ${body.block.user} on ${wiki}` );
+		console.log( `${wiki} - Blocked ${body.block.user}` );
 		return 'Success: The user has been blocked!';
 	}, error => {
 		console.log( `- Error while blocking the user: ${error}` );

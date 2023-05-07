@@ -62,7 +62,7 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 				console.log( `- ${response.statusCode}: Error while reverting the file: ${parseErrors(response)}` );
 				return 'Error: I ran into an error while trying to revert the file version!';
 			}
-			console.log( `- Reverted ${filename} on ${wiki}` );
+			console.log( `${wiki} - Reverted ${filename}` );
 			return 'Success: The file version has been reverted!';
 		}, error => {
 			console.log( `- Error while reverting the file: ${error}` );

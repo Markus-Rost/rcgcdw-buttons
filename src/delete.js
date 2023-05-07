@@ -42,7 +42,7 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 			console.log( `- ${response.statusCode}: Error while deleting the page: ${parseErrors(response)}` );
 			return 'Error: I ran into an error while trying to delete the page!';
 		}
-		console.log( `- Deleted ${body.delete.title} on ${wiki}` );
+		console.log( `${wiki} - Deleted ${body.delete.title}` );
 		return 'Success: The page has been deleted!';
 	}, error => {
 		console.log( `- Error while deleting the page: ${error}` );
