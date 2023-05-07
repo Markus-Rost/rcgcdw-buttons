@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { createServer, STATUS_CODES } from 'node:http';
-import { verify } from 'node:crypto';
+import { subtle } from 'node:crypto';
 import { db, got, enabledOAuth2, oauthVerify } from './src/util.js';
 import { buttons } from './src/index.js';
 
@@ -23,8 +23,10 @@ const server = createServer( (req, res) => {
 			try {
 				let signature = req.headers['x-signature-ed25519'];
 				let timestamp = req.headers['x-signature-timestamp'];
+				console.log(signature)
+				console.log(timestamp)
 				if ( req.headers.authorization !== process.env.token && ( !process.env.key || !signature || !timestamp
-				 || !verify('Ed25519', Buffer.from(timestamp + rawBody), Buffer.from(process.env.key, 'hex'), Buffer.from(signature, 'hex')) ) ) {
+				 || !await subtle.verify('Ed25519', Buffer.from(process.env.key, 'hex'), Buffer.from(signature, 'hex'), Buffer.from(timestamp + rawBody)) ) ) {
 					res.statusCode = 401;
 					return res.end();
 				}
