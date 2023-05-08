@@ -12,10 +12,11 @@ import { getToken } from './token.js';
 export async function blockUser(wiki, context, user, reason = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return 'Error: I ran into an error while trying to block the user!';
+	let expiry = ( /^#\d+$/.test(user) ? 'never' : '2 weeks' );
 	return got.post( `${wiki}api.php`, {
 		form: {
-			action: 'block', user,
-			reason, expiry: 'never',
+			action: 'block',
+			user, reason, expiry,
 			nocreate: true, autoblock: true,
 			token: tokens.csrftoken,
 			assert: 'user', errorformat: 'plaintext',
