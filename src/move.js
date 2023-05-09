@@ -12,7 +12,7 @@ import { getToken } from './token.js';
  */
 export async function movePage(wiki, context, fromid, to, reason = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
-	if ( !tokens ) return 'Error: I ran into an error while trying to move the page back!';
+	if ( !tokens ) return context.get('move_error');
 	return got.post( `${wiki}api.php`, {
 		form: {
 			action: 'move', fromid, to,
@@ -35,22 +35,22 @@ export async function movePage(wiki, context, fromid, to, reason = '', forceRefr
 					return movePage(wiki, context, fromid, to, reason, true);
 				}
 				if ( body.errors.some( error => error.code === 'selfmove' ) ) {
-					return 'Error: The page is already back under this title!';
+					return context.get('move_error_selfmove');
 				}
 				if ( body.errors.some( error => error.code === 'articleexists' ) ) {
-					return 'Error: There is already a different page under this title!';
+					return context.get('move_error_articleexists');
 				}
 				if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected', 'protectedtitle', 'cantmove', 'cantmovefile', 'cantmovefile'].includes( error.code ) ) ) {
-					return 'Error: You don\'t have the permission for this action!';
+					return context.get('error_permissiondenied');
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while moving the page: ${parseErrors(response)}` );
-			return 'Error: I ran into an error while trying to move the page back!';
+			return context.get('move_error');
 		}
 		console.log( `${wiki} - Moved ${body.move.from} to ${body.move.to}` );
-		return 'Success: The page has been moved back!';
+		return context.get('move_success');
 	}, error => {
 		console.log( `- Error while moving the page: ${error}` );
-		return 'Error: I ran into an error while trying to move the page back!';
+		return context.get('move_error');
 	} );
 }

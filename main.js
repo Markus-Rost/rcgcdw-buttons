@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { createServer, STATUS_CODES } from 'node:http';
 import { subtle } from 'node:crypto';
-import { db, got, enabledOAuth2, oauthVerify } from './src/util.js';
+import { getMessage, db, got, enabledOAuth2, oauthVerify, mirahezeWikis } from './src/util.js';
 import { buttons } from './src/index.js';
 
 const PUBLIC_KEY = ( process.env.key ? await subtle.importKey('raw', Buffer.from(process.env.key, 'hex'), 'Ed25519', true, ['verify']).catch(console.log) : null );
@@ -68,13 +68,14 @@ const server = createServer( (req, res) => {
 						}
 					default:
 						result.type = 4;
-						result.data.content = 'Error: Unknown interaction!';
+						result.data.content = getMessage(interaction.locale, 'error_unknown_interaction');
 				}
 				let response = JSON.stringify(result);
 				if ( req.headers.authorization === process.env.token ) {
 					if ( result.data?.custom_id ) result.data.custom_id = `rc_${result.data.custom_id}`;
 					got.post( `https://discord.com/api/v10/interactions/${interaction.id}/${interaction.token}/callback`, {
-						json: result
+						json: result,
+						throwHttpErrors: true
 					} ).catch( error => {
 						console.log( `- Error while responding to the interaction: ${error}` );
 					} );
@@ -120,6 +121,7 @@ const server = createServer( (req, res) => {
 		}
 		let url = oauthSite.url;
 		if ( new RegExp( `^https://[a-z0-9\\.-]*\\b${oauthSite.id}\\b.*/$` ).test(site[2]) ) url = site[2];
+		else if ( oauthSite.id === 'miraheze' && mirahezeWikis.has(site[2]?.split('/')[2]) ) url = site[2];
 		return got.post( `${url}rest.php/oauth2/access_token`, {
 			form: {
 				grant_type: 'authorization_code',

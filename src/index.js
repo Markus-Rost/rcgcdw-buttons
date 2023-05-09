@@ -1,7 +1,11 @@
 import { randomBytes } from 'node:crypto';
-import { db, enabledOAuth2, oauthVerify, Context, reply } from './util.js';
+import { getMessage, db, enabledOAuth2, oauthVerify, Context, reply, mirahezeWikis } from './util.js';
 import * as api from './api.js';
 
+/** 
+ * @param {Object} interaction
+ * @param {Object} [result]
+ */
 export async function buttons(interaction, result = {data: {}}) {
 	var parts = interaction.data.custom_id.split(' ');
 	var hostname = interaction.message?.embeds?.[0]?.url?.split('/')[2];
@@ -10,7 +14,7 @@ export async function buttons(interaction, result = {data: {}}) {
 	var userId = interaction.member?.user?.id;
 	if ( !hostname || !userId || !parts[0].startsWith( '/' ) || !parts[0].endsWith( '/' ) || !api.allowedAction.includes( parts[1] ) ) {
 		result.type = 4;
-		result.data.content = 'Error: Modified message!';
+		result.data.content = getMessage(interaction.locale, 'error_modified_message');
 		return;
 	}
 	var oauthSite = '';
@@ -18,7 +22,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		oauthSite = 'wikimedia';
 		parts[0] = '/w/';
 	}
-	else if ( hostname.endsWith( '.miraheze.org' ) ) {
+	else if ( hostname.endsWith( '.miraheze.org' ) || mirahezeWikis.has(hostname) ) {
 		oauthSite = 'miraheze';
 		parts[0] = '/w/';
 	}
@@ -28,45 +32,25 @@ export async function buttons(interaction, result = {data: {}}) {
 	}
 	if ( !enabledOAuth2.has(oauthSite) ) {
 		result.type = 4;
-		result.data.content = 'Error: Site not supported!';
+		result.data.content = getMessage(interaction.locale, 'error_unknown_site');
 		return;
 	}
 	if ( interaction.type !== 5 ) {
-		let title = 'Unknown action';
-		switch ( parts[1] ) {
-			case 'block':
-				title = 'Block user';
-				break;
-			case 'delete':
-				title = 'Delete page';
-				break;
-			case 'move':
-				title = 'Move page back';
-				break;
-			case 'rollback':
-				title = 'Rollback page';
-				break;
-			case 'file':
-				title = 'Revert file version';
-				break;
-			case 'undo':
-				title = 'Undo edit';
-				break;
-		}
 		result.type = 9;
 		result.data = {
-			custom_id: interaction.data.custom_id, title,
+			custom_id: interaction.data.custom_id,
+			title: getMessage(interaction.locale, `modal_action_${parts[1]}`),
 			components: [{
 				type: 1,
 				components: [{
 					type: 4,
 					custom_id: 'reason',
 					style: 1,
-					label: 'Reason',
+					label: getMessage(interaction.locale, 'modal_reason'),
 					min_length: 0,
 					max_length: 500,
 					required: false,
-					placeholder: ( api.autocommentAction.includes( parts[1] ) ? '(default auto generated reason)' : '' )
+					placeholder: ( api.autocommentAction.includes( parts[1] ) ? getMessage(interaction.locale, 'modal_reason_default') : '' )
 				}]
 			}]
 		};
@@ -76,12 +60,12 @@ export async function buttons(interaction, result = {data: {}}) {
 	result.type = 5;
 	let cacheKey = `${userId} ${oauthSite}`;
 	if ( Context._cache.has(cacheKey) ) {
-		actions(interaction, wiki, Context._cache.get(cacheKey));
+		actions(interaction, wiki, Context._cache.get(cacheKey).updateLocale(interaction.locale));
 		return;
 	}
 	db.query( 'SELECT access, refresh, userid, site FROM oauthrevert WHERE userid = $1 AND site = $2', [userId, oauthSite] ).then( ({rows: [row]}) => {
 		if ( !row ) return Promise.reject();
-		actions(interaction, wiki, new Context(row));
+		actions(interaction, wiki, new Context(row, interaction.locale));
 	}, dberror => {
 		console.log( `- Error while getting the OAuth2 token: ${dberror}` );
 		return Promise.reject();
@@ -97,12 +81,12 @@ export async function buttons(interaction, result = {data: {}}) {
 			client_id: process.env[`oauth_${oauthSite}`]
 		}).toString();
 		let message = {
-			content: `[Please authorize me to make changes on the wiki in your name!](<${oauthURL}>)`,
+			content: `[${getMessage(interaction.locale, 'oauth_message')}](<${oauthURL}>)`,
 			components: [{
 				type: 1,
 				components: [{
 					type: 2,
-					label: 'Authorize',
+					label: getMessage(interaction.locale, 'oauth_button'),
 					style: 5,
 					url: oauthURL,
 					emoji: {
@@ -120,13 +104,18 @@ export async function buttons(interaction, result = {data: {}}) {
 	} );
 }
 
+/** 
+ * @param {Object} interaction
+ * @param {String} wiki
+ * @param {Context} context
+ */
 async function actions(interaction, wiki, context) {
 	var parts = interaction.data.custom_id.split(' ');
 	var reason = interaction.data.components?.find( row => {
 		return row.components?.find?.( component => component.custom_id === 'reason' );
 	} )?.components.find( component => component.custom_id === 'reason' )?.value || '';
 	var message = {
-		content: 'Error: Modified message!',
+		content: context.get('error_modified_message'),
 		flags: 1 << 6,
 		components: [],
 		allowed_mentions: {

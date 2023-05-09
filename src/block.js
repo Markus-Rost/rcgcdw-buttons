@@ -11,7 +11,7 @@ import { getToken } from './token.js';
  */
 export async function blockUser(wiki, context, user, reason = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
-	if ( !tokens ) return 'Error: I ran into an error while trying to block the user!';
+	if ( !tokens ) return context.get('block_error');
 	let expiry = ( /^#\d+$/.test(user) ? 'never' : '2 weeks' );
 	return got.post( `${wiki}api.php`, {
 		form: {
@@ -36,19 +36,19 @@ export async function blockUser(wiki, context, user, reason = '', forceRefresh =
 					return blockUser(wiki, context, user, reason, true);
 				}
 				if ( body.errors.some( error => error.code === 'alreadyblocked' ) ) {
-					return 'Error: The user is already blocked!';
+					return context.get('block_error_alreadyblocked');
 				}
 				if ( body.errors.some( error => ['permissiondenied', 'cantblock'].includes( error.code ) ) ) {
-					return 'Error: You don\'t have the permission for this action!';
+					return context.get('error_permissiondenied');
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while blocking the user: ${parseErrors(response)}` );
-			return 'Error: I ran into an error while trying to block the user!';
+			return context.get('block_error');
 		}
 		console.log( `${wiki} - Blocked ${body.block.user}` );
-		return 'Success: The user has been blocked!';
+		return context.get('block_success');
 	}, error => {
 		console.log( `- Error while blocking the user: ${error}` );
-		return 'Error: I ran into an error while trying to block the user!';
+		return context.get('block_error');
 	} );
 }

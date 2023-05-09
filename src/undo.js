@@ -12,7 +12,7 @@ import { getToken } from './token.js';
  */
 export async function undoPage(wiki, context, pageid, undo, summary = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
-	if ( !tokens ) return 'Error: I ran into an error while trying to undo the edit!';
+	if ( !tokens ) return context.get('undo_error');
 	let formData = {
 		action: 'edit', pageid, undo,
 		token: tokens.csrftoken,
@@ -36,25 +36,25 @@ export async function undoPage(wiki, context, pageid, undo, summary = '', forceR
 					return undoPage(wiki, context, pageid, undo, summary, true);
 				}
 				if ( body.errors.some( error => error.code === 'undofailure' ) ) {
-					return 'Error: The edit couldn\'t be undone due to conflicting intermediate edits!';
+					return context.get('undo_error_undofailure');
 				}
 				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid', 'nosuchrevid'].includes( error.code ) ) ) {
-					return 'Error: The page or revision doesn\'t exist anymore!';
+					return context.get('undo_error_missingtitle');
 				}
 				if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected', 'noedit', 'noimageredirect', 'spamdetected', 'abusefilter-warning', 'abusefilter-disallowed'].includes( error.code ) ) ) {
-					return 'Error: You don\'t have the permission for this action!';
+					return context.get('error_permissiondenied');
 				}
 				if ( body.errors.some( error => error.code === 'editconflict' ) ) {
-					return 'Error: I ran into an edit conflict, please try again!';
+					return context.get('undo_error_editconflict');
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while undoing the edit: ${parseErrors(response)}` );
-			return 'Error: I ran into an error while trying to undo the edit!';
+			return context.get('undo_error');
 		}
 		console.log( `${wiki} - Undid r${undo} on ${body.edit.title}` );
-		return 'Success: The edit has been undone!';
+		return context.get('undo_success');
 	}, error => {
 		console.log( `- Error while undoing the edit: ${error}` );
-		return 'Error: I ran into an error while trying to undo the edit!';
+		return context.get('undo_error');
 	} );
 }

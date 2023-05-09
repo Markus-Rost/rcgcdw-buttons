@@ -1,8 +1,31 @@
+import { readdir } from 'node:fs';
+import { createRequire } from 'node:module';
 import gotDefault from 'got';
 import { gotSsrf } from 'got-ssrf';
 import pg from 'pg';
+const require = createRequire(import.meta.url);
 
 globalThis.isDebug = ( process.argv[2] === 'debug' );
+
+/** @type {Map<String, Map<String, String>>} */
+const allLangs = new Map();
+readdir( './i18n', (error, files) => {
+	if ( error ) return error;
+	files.filter( file => file.endsWith('.json') ).forEach( file => {
+		var translations = require(`../i18n/${file}`);
+		var lang = file.slice(0, -5);
+		allLangs.set(lang, new Map(Object.entries(translations)));
+	} );
+} );
+/**
+ * Get a translated message.
+ * @param {String} locale
+ * @param {String} message
+ * @returns {String}
+ */
+export function getMessage(locale, message) {
+	return allLangs.get(locale)?.get(message) || allLangs.get('en-US')?.get(message) || `⧼${message}⧽`;
+}
 
 /*
 CREATE TABLE oauthrevert (
@@ -70,9 +93,10 @@ export class Context {
 	 * @param {String} row.refresh - The refresh token.
 	 * @param {String} row.userid - The Discord user id.
 	 * @param {String} row.site - The OAuth site.
+	 * @param {String} locale - The language of the Discord user.
 	 * @constructs Context
 	 */
-	constructor(row) {
+	constructor(row, locale) {
 		let cacheKey = `${row.userid} ${row.site}`;
 		if ( contextCache.has(cacheKey) ) {
 			return contextCache.get(cacheKey);
@@ -85,7 +109,27 @@ export class Context {
 		this.userId = row.userid;
 		/** @type {String} */
 		this.site = row.site;
+		/** @type {String} */
+		this.locale = ( allLangs.has(locale) ? locale : 'en-US' );
 		contextCache.set(cacheKey, this);
+	}
+	/**
+	 * Update the Discord users locale.
+	 * @param {String} locale
+	 * @returns {this}
+	 */
+	updateLocale(locale) {
+		if ( allLangs.has(locale) ) this.locale = locale;
+		return this;
+	}
+
+	/**
+	 * Get a translated message.
+	 * @param {String} message
+	 * @returns {String}
+	 */
+	get(message) {
+		return getMessage(this.locale, message);
 	}
 
 	/**
@@ -137,7 +181,8 @@ export class Context {
 export function reply(interaction, message) {
 	if ( !message.components ) message.components = [];
 	got.patch( `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
-		json: message
+		json: message,
+		throwHttpErrors: true
 	} ).catch( error => {
 		console.log( `- Error while replying to the interaction: ${error}` );
 	} );
@@ -152,3 +197,14 @@ export function parseErrors(response) {
 	if ( !error ) error = response?.headers?.['mediawiki-api-error'] || response?.statusMessage;
 	return error || '';
 }
+
+export const mirahezeWikis = new Set();
+got.get( 'https://raw.githubusercontent.com/miraheze/ssl/master/certs.yaml', {
+	responseType: 'text',
+	throwHttpErrors: true
+} ).then( response => {
+	if ( !response?.body?.includes?.( '# Production' ) ) return;
+	response.body.split('# Production')[1].match(/(?<=url: ')[a-z0-9.-]+(?=')/g).forEach( wiki => mirahezeWikis.add(wiki) );
+}, error => {
+	console.log( `- Error while getting the Miraheze wikis: ${error}` );
+} );

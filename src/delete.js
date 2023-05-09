@@ -11,7 +11,7 @@ import { getToken } from './token.js';
  */
 export async function deletePage(wiki, context, pageid, reason = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
-	if ( !tokens ) return 'Error: I ran into an error while trying to delete the page!';
+	if ( !tokens ) return context.get('delete_error');
 	return got.post( `${wiki}api.php`, {
 		form: {
 			action: 'delete', pageid, reason,
@@ -32,20 +32,20 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return deletePage(wiki, context, pageid, reason, true);
 				}
-				if ( body.errors.some( error => ['missingtitle', 'cantdelete'].includes( error.code ) ) ) {
-					return 'Error: The page has already been deleted!';
+				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid', 'cantdelete'].includes( error.code ) ) ) {
+					return context.get('delete_error_missingtitle');
 				}
 				if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected'].includes( error.code ) ) ) {
-					return 'Error: You don\'t have the permission for this action!';
+					return context.get('error_permissiondenied');
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while deleting the page: ${parseErrors(response)}` );
-			return 'Error: I ran into an error while trying to delete the page!';
+			return context.get('delete_error');
 		}
 		console.log( `${wiki} - Deleted ${body.delete.title}` );
-		return 'Success: The page has been deleted!';
+		return context.get('delete_success');
 	}, error => {
 		console.log( `- Error while deleting the page: ${error}` );
-		return 'Error: I ran into an error while trying to delete the page!';
+		return context.get('delete_error');
 	} );
 }

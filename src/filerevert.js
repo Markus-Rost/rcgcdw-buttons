@@ -12,7 +12,7 @@ import { getToken } from './token.js';
  */
 export async function revertFile(wiki, context, pageids, timestamp, comment = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
-	if ( !tokens ) return 'Error: I ran into an error while trying to revert the file version!';
+	if ( !tokens ) return context.get('filerevert_error');
 	return got.get( `${wiki}api.php`, {
 		searchParams: {
 			action: 'query', pageids,
@@ -31,7 +31,7 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while getting the file name: ${parseErrors(response)}` );
-			return 'Error: I ran into an error while trying to revert the file version!';
+			return context.get('filerevert_error');
 		}
 		var filename = body.query.pages[0].title.split(':').slice(1).join(':');
 		return got.post( `${wiki}api.php`, {
@@ -56,20 +56,20 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 						return revertFile(wiki, context, pageids, timestamp, comment, true);
 					}
 					if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected'].includes( error.code ) ) ) {
-						return 'Error: You don\'t have the permission for this action!';
+						return context.get('error_permissiondenied');
 					}
 				}
 				console.log( `- ${response.statusCode}: Error while reverting the file: ${parseErrors(response)}` );
-				return 'Error: I ran into an error while trying to revert the file version!';
+				return context.get('filerevert_error');
 			}
 			console.log( `${wiki} - Reverted ${filename}` );
-			return 'Success: The file version has been reverted!';
+			return context.get('filerevert_success');
 		}, error => {
 			console.log( `- Error while reverting the file: ${error}` );
-			return 'Error: I ran into an error while trying to revert the file version!';
+			return context.get('filerevert_error');
 		} );
 	}, error => {
 		console.log( `- Error while getting the file name: ${error}` );
-		return 'Error: I ran into an error while trying to revert the file version!';
+		return context.get('filerevert_error');
 	} );
 }

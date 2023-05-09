@@ -12,7 +12,7 @@ import { getToken } from './token.js';
  */
 export async function rollbackPage(wiki, context, pageid, user, summary = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'rollback', forceRefresh);
-	if ( !tokens ) return 'Error: I ran into an error while trying to rollback the page!';
+	if ( !tokens ) return context.get('rollback_error');
 	return got.post( `${wiki}api.php`, {
 		form: {
 			action: 'rollback',
@@ -34,23 +34,26 @@ export async function rollbackPage(wiki, context, pageid, user, summary = '', fo
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return rollbackPage(wiki, context, pageid, user, summary, true);
 				}
+				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid'].includes( error.code ) ) ) {
+					return context.get('rollback_error_missingtitle');
+				}
 				if ( body.errors.some( error => error.code === 'onlyauthor' ) ) {
-					return 'Error: The user is the only editor of this page!';
+					return context.get('rollback_error_onlyauthor');
 				}
 				if ( body.errors.some( error => error.code === 'alreadyrolled' ) ) {
-					return 'Error: The user was not the last one to edit this page or there were no changes to roll back!';
+					return context.get('rollback_error_alreadyrolled');
 				}
 				if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected'].includes( error.code ) ) ) {
-					return 'Error: You don\'t have the permission for this action!';
+					return context.get('error_permissiondenied');
 				}
 			}
 			console.log( `- ${response.statusCode}: Error while reverting the page: ${parseErrors(response)}` );
-			return 'Error: I ran into an error while trying to rollback the page!';
+			return context.get('rollback_error');
 		}
 		console.log( `${wiki} - Reverted ${user} on ${body.rollback.title}` );
-		return 'Success: The page has been rolled back!';
+		return context.get('rollback_success');
 	}, error => {
 		console.log( `- Error while reverting the page: ${error}` );
-		return 'Error: I ran into an error while trying to rollback the page!';
+		return context.get('rollback_error');
 	} );
 }
