@@ -35,7 +35,7 @@ export async function rollbackPage(wiki, context, pageid, user, summary = '', fo
 					return rollbackPage(wiki, context, pageid, user, summary, true);
 				}
 				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid'].includes( error.code ) ) ) {
-					return context.get('rollback_error_missingtitle');
+					return context.get('error_missingtitle');
 				}
 				if ( body.errors.some( error => error.code === 'onlyauthor' ) ) {
 					return context.get('rollback_error_onlyauthor');

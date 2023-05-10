@@ -35,11 +35,11 @@ export async function undoPage(wiki, context, pageid, undo, summary = '', forceR
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return undoPage(wiki, context, pageid, undo, summary, true);
 				}
+				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid', 'nosuchrevid'].includes( error.code ) ) ) {
+					return context.get('error_missingtitle');
+				}
 				if ( body.errors.some( error => error.code === 'undofailure' ) ) {
 					return context.get('undo_error_undofailure');
-				}
-				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid', 'nosuchrevid'].includes( error.code ) ) ) {
-					return context.get('undo_error_missingtitle');
 				}
 				if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected', 'noedit', 'noimageredirect', 'spamdetected', 'abusefilter-warning', 'abusefilter-disallowed'].includes( error.code ) ) ) {
 					return context.get('error_permissiondenied');

@@ -33,7 +33,7 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 					return deletePage(wiki, context, pageid, reason, true);
 				}
 				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid', 'cantdelete'].includes( error.code ) ) ) {
-					return context.get('delete_error_missingtitle');
+					return context.get('error_missingtitle');
 				}
 				if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected'].includes( error.code ) ) ) {
 					return context.get('error_permissiondenied');

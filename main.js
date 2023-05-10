@@ -1,16 +1,17 @@
 import 'dotenv/config';
 import { createServer, STATUS_CODES } from 'node:http';
 import { subtle } from 'node:crypto';
-import { getMessage, db, got, enabledOAuth2, oauthVerify, mirahezeWikis } from './src/util.js';
+import { REDIRECT_URI_WIKI, getMessage, db, got, enabledOAuth2, oauthVerify, mirahezeWikis } from './src/util.js';
 import { buttons } from './src/index.js';
 
 const PUBLIC_KEY = ( process.env.key ? await subtle.importKey('raw', Buffer.from(process.env.key, 'hex'), 'Ed25519', true, ['verify']).catch(console.log) : null );
+const REDIRECT_URI_DISCORD = new URL(process.env.interactions_path, process.env.redirect_uri).href;
 
 const oauthURL = `https://discord.com/oauth2/authorize?` + new URLSearchParams({
 	response_type: 'code',
 	scope: 'webhook.incoming',
 	client_id: process.env.bot,
-	redirect_uri: process.env.webhook
+	redirect_uri: REDIRECT_URI_DISCORD
 }).toString();
 
 const server = createServer( (req, res) => {
@@ -18,7 +19,7 @@ const server = createServer( (req, res) => {
 	res.setHeader('Content-Type', 'text/html');
 	res.setHeader('Content-Language', ['en']);
 
-	if ( req.method === 'POST' && req.url === '/interactions' ) {
+	if ( req.method === 'POST' && req.url === process.env.interactions_path ) {
 		let body = [];
 		req.on( 'data', chunk => {
 			body.push(chunk);
@@ -105,9 +106,9 @@ const server = createServer( (req, res) => {
 		return res.end();
 	}
 
-	var reqURL = new URL(req.url, process.env.dashboard);
+	var reqURL = new URL(req.url, process.env.redirect_uri);
 
-	if ( reqURL.pathname === '/oauth' ) {
+	if ( reqURL.pathname === process.env.wiki_path ) {
 		if ( !reqURL.searchParams.get('code') || !reqURL.searchParams.get('state') ) {
 			res.writeHead(302, {Location: '/?oauth=failed'});
 			return res.end();
@@ -126,7 +127,7 @@ const server = createServer( (req, res) => {
 			form: {
 				grant_type: 'authorization_code',
 				code: reqURL.searchParams.get('code'),
-				redirect_uri: process.env.dashboard,
+				redirect_uri: REDIRECT_URI_WIKI,
 				client_id: process.env[`oauth_${oauthSite.id}`],
 				client_secret: process.env[`oauth_${oauthSite.id}_secret`]
 			}
@@ -162,7 +163,7 @@ const server = createServer( (req, res) => {
 		form: {
 			grant_type: 'authorization_code',
 			code: reqURL.searchParams.get('code'),
-			redirect_uri: process.env.webhook,
+			redirect_uri: REDIRECT_URI_DISCORD,
 			client_id: process.env.bot,
 			client_secret: process.env.secret
 		}
@@ -187,8 +188,8 @@ const server = createServer( (req, res) => {
 	} );
 } );
 
-server.listen( 8800, 'localhost', () => {
-	console.log( '- RcGcDw buttons: Server running at http://localhost:8800/' );
+server.listen( process.env.server_port, process.env.server_hostname, () => {
+	console.log( `- RcGcDw buttons: Server running at http://${process.env.server_hostname}:${process.env.server_port}/` );
 } );
 
 process.on( 'warning', warning => {

@@ -6,6 +6,7 @@ import pg from 'pg';
 const require = createRequire(import.meta.url);
 
 globalThis.isDebug = ( process.argv[2] === 'debug' );
+export const REDIRECT_URI_WIKI = new URL(process.env.wiki_path, process.env.redirect_uri).href;
 
 /** @type {Map<String, Map<String, String>>} */
 const allLangs = new Map();
@@ -143,7 +144,7 @@ export class Context {
 			form: {
 				grant_type: 'refresh_token',
 				refresh_token: this.refreshToken,
-				redirect_uri: process.env.dashboard,
+				redirect_uri: REDIRECT_URI_WIKI,
 				client_id: process.env[`oauth_${this.site}`],
 				client_secret: process.env[`oauth_${this.site}_secret`]
 			}

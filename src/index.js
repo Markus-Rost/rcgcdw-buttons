@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { getMessage, db, enabledOAuth2, oauthVerify, Context, reply, mirahezeWikis } from './util.js';
+import { REDIRECT_URI_WIKI, getMessage, db, enabledOAuth2, oauthVerify, Context, reply, mirahezeWikis } from './util.js';
 import * as api from './api.js';
 
 /** 
@@ -77,7 +77,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		oauthVerify.set(state, {userId, interaction});
 		let oauthURL = `${wiki}rest.php/oauth2/authorize?` + new URLSearchParams({
 			response_type: 'code', state,
-			redirect_uri: process.env.dashboard,
+			redirect_uri: REDIRECT_URI_WIKI,
 			client_id: process.env[`oauth_${oauthSite}`]
 		}).toString();
 		let message = {

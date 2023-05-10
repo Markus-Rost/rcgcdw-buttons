@@ -34,6 +34,9 @@ export async function movePage(wiki, context, fromid, to, reason = '', forceRefr
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return movePage(wiki, context, fromid, to, reason, true);
 				}
+				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid'].includes( error.code ) ) ) {
+					return context.get('error_missingtitle');
+				}
 				if ( body.errors.some( error => error.code === 'selfmove' ) ) {
 					return context.get('move_error_selfmove');
 				}
