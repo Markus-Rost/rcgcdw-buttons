@@ -17,24 +17,16 @@ export async function buttons(interaction, result = {data: {}}) {
 		result.data.content = getMessage(interaction.locale, 'error_modified_message');
 		return;
 	}
-	var oauthSite = '';
-	if ( hostname.endsWith( '.wikimedia.org' ) ) {
-		oauthSite = 'wikimedia';
-		parts[0] = '/w/';
-	}
-	else if ( hostname.endsWith( '.miraheze.org' ) || mirahezeWikis.has(hostname) ) {
-		oauthSite = 'miraheze';
-		parts[0] = '/w/';
-	}
-	else if ( hostname.endsWith( '.wikiforge.net' ) ) {
-		oauthSite = 'wikiforge';
-		parts[0] = '/w/';
-	}
+	var oauthSite = hostname;
+	if ( hostname.endsWith( '.wikimedia.org' ) ) oauthSite = 'wikimedia';
+	else if ( hostname.endsWith( '.miraheze.org' ) || mirahezeWikis.has(hostname) ) oauthSite = 'miraheze';
+	else if ( hostname.endsWith( '.wikiforge.net' ) ) oauthSite = 'wikiforge';
 	if ( !enabledOAuth2.has(oauthSite) ) {
 		result.type = 4;
 		result.data.content = getMessage(interaction.locale, 'error_unknown_site');
 		return;
 	}
+	parts[0] = enabledOAuth2.get(oauthSite).script || parts[0];
 	if ( interaction.type !== 5 ) {
 		result.type = 9;
 		result.data = {

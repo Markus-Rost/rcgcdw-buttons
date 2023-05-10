@@ -55,24 +55,34 @@ export const got = gotDefault.extend( {
 	responseType: 'json'
 }, gotSsrf );
 
-/** @type {Map<String, {id: String, url: String}>} */
+/** @type {Map<String, {id: String, script?: String, url: String}>} */
 export const enabledOAuth2 = new Map();
 if ( process.env.oauth_wikimedia && process.env.oauth_wikimedia_secret ) {
 	enabledOAuth2.set('wikimedia', {
 		id: 'wikimedia',
+		script: '/w/',
 		url: 'https://meta.wikimedia.org/w/'
 	});
 }
 if ( process.env.oauth_miraheze && process.env.oauth_miraheze_secret ) {
 	enabledOAuth2.set('miraheze', {
 		id: 'miraheze',
+		script: '/w/',
 		url: 'https://meta.miraheze.org/w/'
 	});
 }
 if ( process.env.oauth_wikiforge && process.env.oauth_wikiforge_secret ) {
 	enabledOAuth2.set('wikiforge', {
 		id: 'wikiforge',
+		script: '/w/',
 		url: 'https://meta.wikiforge.net/w/'
+	});
+}
+if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] ) {
+	enabledOAuth2.set('lakeus.xyz', {
+		id: 'lakeus.xyz',
+		script: '/',
+		url: 'https://lakeus.xyz/'
 	});
 }
 
