@@ -64,6 +64,13 @@ if ( process.env.oauth_wikimedia && process.env.oauth_wikimedia_secret ) {
 		url: 'https://meta.wikimedia.org/w/'
 	});
 }
+if ( process.env.oauth_wikigg && process.env.oauth_wikigg_secret ) {
+	enabledOAuth2.set('wikigg', {
+		id: 'wikigg',
+		script: '/',
+		url: 'https://support.wiki.gg/'
+	});
+}
 if ( process.env.oauth_miraheze && process.env.oauth_miraheze_secret ) {
 	enabledOAuth2.set('miraheze', {
 		id: 'miraheze',

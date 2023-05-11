@@ -19,6 +19,7 @@ export async function buttons(interaction, result = {data: {}}) {
 	}
 	var oauthSite = hostname;
 	if ( hostname.endsWith( '.wikimedia.org' ) ) oauthSite = 'wikimedia';
+	else if ( hostname.endsWith( '.wiki.gg' ) ) oauthSite = 'wikigg';
 	else if ( hostname.endsWith( '.miraheze.org' ) || mirahezeWikis.has(hostname) ) oauthSite = 'miraheze';
 	else if ( hostname.endsWith( '.wikiforge.net' ) ) oauthSite = 'wikiforge';
 	if ( !enabledOAuth2.has(oauthSite) ) {
