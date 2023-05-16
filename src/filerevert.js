@@ -30,7 +30,7 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 					return revertFile(wiki, context, pageids, timestamp, comment, true);
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while getting the file name: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while getting the file name on ${wiki}: ${parseErrors(response)}` );
 			return context.get('filerevert_error');
 		}
 		var filename = body.query.pages[0].title.split(':').slice(1).join(':');
@@ -59,17 +59,17 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 						return context.get('error_permissiondenied');
 					}
 				}
-				console.log( `- ${response.statusCode}: Error while reverting the file: ${parseErrors(response)}` );
+				console.log( `- ${response.statusCode}: Error while reverting the file on ${wiki}: ${parseErrors(response)}` );
 				return context.get('filerevert_error');
 			}
-			console.log( `${wiki} - Reverted ${filename}` );
+			console.log( `${wiki} - ${context.userId} reverted ${filename}` );
 			return context.get('filerevert_success');
 		}, error => {
-			console.log( `- Error while reverting the file: ${error}` );
+			console.log( `- Error while reverting the file on ${wiki}: ${error}` );
 			return context.get('filerevert_error');
 		} );
 	}, error => {
-		console.log( `- Error while getting the file name: ${error}` );
+		console.log( `- Error while getting the file name on ${wiki}: ${error}` );
 		return context.get('filerevert_error');
 	} );
 }

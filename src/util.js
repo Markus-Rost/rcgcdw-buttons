@@ -168,7 +168,7 @@ export class Context {
 		} ).then( response => {
 			var body = response.body;
 			if ( response.statusCode !== 200 || !body?.access_token ) {
-				console.log( `- ${response.statusCode}: Error while refreshing the mediawiki token: ${body?.message||body?.error}` );
+				console.log( `- ${response.statusCode}: Error while refreshing the OAuth2 token on ${wiki}: ${body?.message||body?.error}` );
 				db.query( 'DELETE FROM oauthrevert WHERE userid = $1 AND site = $2', [this.userId, this.site] ).then( () => {
 					console.log( `- OAuth2 token for ${this.userId} on ${this.site} successfully deleted.` );
 				}, dberror => {
@@ -186,7 +186,7 @@ export class Context {
 			} );
 			return true;
 		}, error => {
-			console.log( `- Error while refreshing the mediawiki token: ${error}` );
+			console.log( `- Error while refreshing the OAuth2 token on ${wiki}: ${error}` );
 			return false;
 		} );
 	}

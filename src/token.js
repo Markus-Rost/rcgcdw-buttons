@@ -33,14 +33,14 @@ export async function getToken(wiki, context, type = 'csrf', forceRefresh = fals
 					return getToken(wiki, context, type, true);
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while getting the token: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while getting the token on ${wiki}: ${parseErrors(response)}` );
 			return;
 		}
 		if ( tokenCache.has(cacheKey) ) return Object.assign(tokenCache.get(cacheKey), body.query.tokens);
 		tokenCache.set(cacheKey, body.query.tokens);
 		return body.query.tokens;
 	}, error => {
-		console.log( `- Error while getting the token: ${error}` );
+		console.log( `- Error while getting the token on ${wiki}: ${error}` );
 		return;
 	} );
 }

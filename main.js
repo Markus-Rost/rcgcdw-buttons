@@ -134,7 +134,7 @@ const server = createServer( (req, res) => {
 		} ).then( response => {
 			var body = response.body;
 			if ( response.statusCode !== 200 || !body?.access_token ) {
-				console.log( `- RcGcDw buttons: ${response.statusCode}: Error while getting the mediawiki token: ${body?.message||body?.error}` );
+				console.log( `- RcGcDw buttons: ${response.statusCode}: Error while getting the OAuth2 token on ${url}: ${body?.message||body?.error}` );
 				res.writeHead(302, {Location: '/?oauth=failed'});
 				return res.end();
 			}
@@ -149,7 +149,7 @@ const server = createServer( (req, res) => {
 			res.writeHead(302, {Location: '/?oauth=success'});
 			return res.end();
 		}, error => {
-			console.log( `- RcGcDw buttons: Error while getting the mediawiki token: ${error}` );
+			console.log( `- RcGcDw buttons: Error while getting the OAuth2 token on ${url}: ${error}` );
 			res.writeHead(302, {Location: '/?oauth=failed'});
 			return res.end();
 		} );

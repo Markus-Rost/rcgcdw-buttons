@@ -47,13 +47,13 @@ export async function movePage(wiki, context, fromid, to, reason = '', forceRefr
 					return context.get('error_permissiondenied');
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while moving the page: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while moving the page on ${wiki}: ${parseErrors(response)}` );
 			return context.get('move_error');
 		}
-		console.log( `${wiki} - Moved ${body.move.from} to ${body.move.to}` );
+		console.log( `${wiki} - ${context.userId} moved ${body.move.from} to ${body.move.to}` );
 		return context.get('move_success');
 	}, error => {
-		console.log( `- Error while moving the page: ${error}` );
+		console.log( `- Error while moving the page on ${wiki}: ${error}` );
 		return context.get('move_error');
 	} );
 }

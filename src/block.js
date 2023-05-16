@@ -42,13 +42,13 @@ export async function blockUser(wiki, context, user, reason = '', forceRefresh =
 					return context.get('error_permissiondenied');
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while blocking the user: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while blocking the user on ${wiki}: ${parseErrors(response)}` );
 			return context.get('block_error');
 		}
-		console.log( `${wiki} - Blocked ${body.block.user}` );
+		console.log( `${wiki} - ${context.userId} blocked ${body.block.user}` );
 		return context.get('block_success');
 	}, error => {
-		console.log( `- Error while blocking the user: ${error}` );
+		console.log( `- Error while blocking the user on ${wiki}: ${error}` );
 		return context.get('block_error');
 	} );
 }

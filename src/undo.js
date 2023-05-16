@@ -48,13 +48,13 @@ export async function undoPage(wiki, context, pageid, undo, summary = '', forceR
 					return context.get('undo_error_editconflict');
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while undoing the edit: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while undoing the edit on ${wiki}: ${parseErrors(response)}` );
 			return context.get('undo_error');
 		}
-		console.log( `${wiki} - Undid r${undo} on ${body.edit.title}` );
+		console.log( `${wiki} - ${context.userId} undid r${undo} on ${body.edit.title}` );
 		return context.get('undo_success');
 	}, error => {
-		console.log( `- Error while undoing the edit: ${error}` );
+		console.log( `- Error while undoing the edit on ${wiki}: ${error}` );
 		return context.get('undo_error');
 	} );
 }

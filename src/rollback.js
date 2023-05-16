@@ -47,13 +47,13 @@ export async function rollbackPage(wiki, context, pageid, user, summary = '', fo
 					return context.get('error_permissiondenied');
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while reverting the page: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while reverting the page on ${wiki}: ${parseErrors(response)}` );
 			return context.get('rollback_error');
 		}
-		console.log( `${wiki} - Reverted ${user} on ${body.rollback.title}` );
+		console.log( `${wiki} - ${context.userId} reverted ${user} on ${body.rollback.title}` );
 		return context.get('rollback_success');
 	}, error => {
-		console.log( `- Error while reverting the page: ${error}` );
+		console.log( `- Error while reverting the page on ${wiki}: ${error}` );
 		return context.get('rollback_error');
 	} );
 }

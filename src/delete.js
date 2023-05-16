@@ -39,13 +39,13 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 					return context.get('error_permissiondenied');
 				}
 			}
-			console.log( `- ${response.statusCode}: Error while deleting the page: ${parseErrors(response)}` );
+			console.log( `- ${response.statusCode}: Error while deleting the page on ${wiki}: ${parseErrors(response)}` );
 			return context.get('delete_error');
 		}
-		console.log( `${wiki} - Deleted ${body.delete.title}` );
+		console.log( `${wiki} - ${context.userId} deleted ${body.delete.title}` );
 		return context.get('delete_success');
 	}, error => {
-		console.log( `- Error while deleting the page: ${error}` );
+		console.log( `- Error while deleting the page on ${wiki}: ${error}` );
 		return context.get('delete_error');
 	} );
 }
