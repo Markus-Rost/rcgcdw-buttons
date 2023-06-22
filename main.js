@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { createServer, STATUS_CODES } from 'node:http';
 import { subtle } from 'node:crypto';
-import { REDIRECT_URI_WIKI, getMessage, db, got, enabledOAuth2, oauthVerify, mirahezeWikis } from './src/util.js';
+import { REDIRECT_URI_WIKI, getMessage, db, got, enabledOAuth2, oauthVerify, customDomainWikis } from './src/util.js';
 import { buttons } from './src/index.js';
 
 const PUBLIC_KEY = ( process.env.key ? await subtle.importKey('raw', Buffer.from(process.env.key, 'hex'), 'Ed25519', true, ['verify']).catch(console.log) : null );
@@ -122,7 +122,8 @@ const server = createServer( (req, res) => {
 		}
 		let url = oauthSite.url;
 		if ( new RegExp( `^https://[a-z0-9\\.-]*\\b${oauthSite.id}\\b.*/$` ).test(site[2]) ) url = site[2];
-		else if ( oauthSite.id === 'miraheze' && mirahezeWikis.has(site[2]?.split('/')[2]) ) url = site[2];
+		else if ( oauthSite.id === 'miraheze' && customDomainWikis.miraheze.has(site[2]?.split('/')[2]) ) url = site[2];
+		else if ( oauthSite.id === 'wikitide' && customDomainWikis.wikitide.has(site[2]?.split('/')[2]) ) url = site[2];
 		return got.post( `${url}rest.php/oauth2/access_token`, {
 			form: {
 				grant_type: 'authorization_code',

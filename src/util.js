@@ -78,11 +78,18 @@ if ( process.env.oauth_miraheze && process.env.oauth_miraheze_secret ) {
 		url: 'https://meta.miraheze.org/w/'
 	});
 }
-if ( process.env.oauth_wikiforge && process.env.oauth_wikiforge_secret ) {
-	enabledOAuth2.set('wikiforge', {
-		id: 'wikiforge',
+if ( process.env.oauth_wikitide && process.env.oauth_wikitide_secret ) {
+	enabledOAuth2.set('wikitide', {
+		id: 'wikitide',
 		script: '/w/',
-		url: 'https://meta.wikiforge.net/w/'
+		url: 'https://meta.wikitide.com/w/'
+	});
+}
+if ( process.env.oauth_telepedia && process.env.oauth_telepedia_secret ) {
+	enabledOAuth2.set('telepedia', {
+		id: 'telepedia',
+		script: '/',
+		url: 'https://meta.telepedia.net/'
 	});
 }
 if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] ) {
@@ -216,13 +223,26 @@ export function parseErrors(response) {
 	return error || '';
 }
 
-export const mirahezeWikis = new Set();
+/** @type {{miraheze: Set<String>, wikitide: Set<String>}} */
+export const customDomainWikis = {
+	miraheze: new Set(),
+	wikitide: new Set()
+};
 got.get( 'https://raw.githubusercontent.com/miraheze/ssl/master/certs.yaml', {
 	responseType: 'text',
 	throwHttpErrors: true
 } ).then( response => {
 	if ( !response?.body?.includes?.( '# Production' ) ) return;
-	response.body.split('# Production')[1].match(/(?<=url: ')[a-z0-9.-]+(?=')/g).forEach( wiki => mirahezeWikis.add(wiki) );
+	response.body.split('# Production')[1].match(/(?<=url: ')[a-z0-9.-]+(?=')/g).forEach( wiki => customDomainWikis.miraheze.add(wiki) );
 }, error => {
 	console.log( `- Error while getting the Miraheze wikis: ${error}` );
+} );
+got.get( 'https://raw.githubusercontent.com/WikiForge/ssl/master/certs.yaml', {
+	responseType: 'text',
+	throwHttpErrors: true
+} ).then( response => {
+	if ( !response?.body?.includes?.( '# WikiTide' ) ) return;
+	response.body.split('# WikiTide')[1].match(/(?<=url: ')[a-z0-9.-]+(?=')/g).forEach( wiki => customDomainWikis.wikitide.add(wiki) );
+}, error => {
+	console.log( `- Error while getting the WikiTide wikis: ${error}` );
 } );

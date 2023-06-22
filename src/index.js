@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { REDIRECT_URI_WIKI, getMessage, db, enabledOAuth2, oauthVerify, Context, reply, mirahezeWikis } from './util.js';
+import { REDIRECT_URI_WIKI, getMessage, db, enabledOAuth2, oauthVerify, Context, reply, customDomainWikis } from './util.js';
 import * as api from './api.js';
 
 /** 
@@ -20,8 +20,9 @@ export async function buttons(interaction, result = {data: {}}) {
 	var oauthSite = hostname;
 	if ( hostname.endsWith( '.wikimedia.org' ) ) oauthSite = 'wikimedia';
 	else if ( hostname.endsWith( '.wiki.gg' ) ) oauthSite = 'wikigg';
-	else if ( hostname.endsWith( '.miraheze.org' ) || mirahezeWikis.has(hostname) ) oauthSite = 'miraheze';
-	else if ( hostname.endsWith( '.wikiforge.net' ) ) oauthSite = 'wikiforge';
+	else if ( hostname.endsWith( '.miraheze.org' ) || customDomainWikis.miraheze.has(hostname) ) oauthSite = 'miraheze';
+	else if ( hostname.endsWith( '.wikitide.com' ) || customDomainWikis.wikitide.has(hostname) ) oauthSite = 'wikitide';
+	else if ( hostname.endsWith( '.telepedia.net' ) ) oauthSite = 'telepedia';
 	if ( !enabledOAuth2.has(oauthSite) ) {
 		result.type = 4;
 		result.data.content = getMessage(interaction.locale, 'error_unknown_site');
