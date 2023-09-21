@@ -92,6 +92,13 @@ if ( process.env.oauth_telepedia && process.env.oauth_telepedia_secret ) {
 		url: 'https://meta.telepedia.net/'
 	});
 }
+if ( process.env['oauth_minecraft.wiki'] && process.env['oauth_minecraft.wiki_secret'] ) {
+	enabledOAuth2.set('minecraft.wiki', {
+		id: 'minecraft.wiki',
+		script: '/',
+		url: 'https://minecraft.wiki/'
+	});
+}
 if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] ) {
 	enabledOAuth2.set('lakeus.xyz', {
 		id: 'lakeus.xyz',
