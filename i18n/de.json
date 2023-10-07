@@ -22,7 +22,7 @@
 	"move_error": "Fehler: Fehler beim Zurückverschieben der Seite!",
 	"move_error_articleexists": "Fehler: Es gibt bereits eine andere Seite unter diesem Titel!",
 	"move_error_selfmove": "Fehler: Die Seite ist bereits zurück unter diesem Titel!",
-	"move_success": "Erfolg: Die Seite wurde zurück verschoben!",
+	"move_success": "Erfolg: Die Seite wurde zurückverschoben!",
 	"oauth_button": "Autorisieren",
 	"oauth_message": "Bitte ermächtige mich, Änderungen im Wiki in deinem Namen vorzunehmen!",
 	"rollback_error": "Fehler: Fehler beim Zurücksetzen der Seite!",
