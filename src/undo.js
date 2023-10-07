@@ -16,7 +16,8 @@ export async function undoPage(wiki, context, pageid, undo, summary = '', forceR
 	let formData = {
 		action: 'edit', pageid, undo,
 		token: tokens.csrftoken,
-		assert: 'user', errorformat: 'plaintext',
+		assert: 'user', errorlang: 'en',
+		errorformat: 'plaintext',
 		formatversion: 2, format: 'json'
 	};
 	if ( summary ) formData.summary = summary;

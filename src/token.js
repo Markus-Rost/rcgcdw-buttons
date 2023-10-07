@@ -19,7 +19,8 @@ export async function getToken(wiki, context, type = 'csrf', forceRefresh = fals
 	return got.get( `${wiki}api.php`, {
 		searchParams: {
 			action: 'query', meta: 'tokens', type,
-			assert: 'user', errorformat: 'plaintext',
+			assert: 'user', errorlang: 'en',
+			errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
 		},
 		headers: {

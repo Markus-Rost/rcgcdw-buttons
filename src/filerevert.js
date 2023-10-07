@@ -16,7 +16,8 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 	return got.get( `${wiki}api.php`, {
 		searchParams: {
 			action: 'query', pageids,
-			assert: 'user', errorformat: 'plaintext',
+			assert: 'user', errorlang: 'en',
+			errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
 		},
 		headers: {
@@ -39,7 +40,8 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 				action: 'filerevert', comment, filename,
 				archivename: `${timestamp}!${filename}`,
 				token: tokens.csrftoken,
-				assert: 'user', errorformat: 'plaintext',
+				assert: 'user', errorlang: 'en',
+				errorformat: 'plaintext',
 				formatversion: 2, format: 'json'
 			},
 			headers: {

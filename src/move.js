@@ -18,7 +18,8 @@ export async function movePage(wiki, context, fromid, to, reason = '', forceRefr
 			action: 'move', fromid, to,
 			reason, noredirect: true,
 			token: tokens.csrftoken,
-			assert: 'user', errorformat: 'plaintext',
+			assert: 'user', errorlang: 'en',
+			errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
 		},
 		headers: {

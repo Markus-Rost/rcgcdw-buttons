@@ -18,7 +18,8 @@ export async function rollbackPage(wiki, context, pageid, user, summary = '', fo
 			action: 'rollback',
 			pageid, user, summary,
 			token: tokens.rollbacktoken,
-			assert: 'user', errorformat: 'plaintext',
+			assert: 'user', errorlang: 'en',
+			errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
 		},
 		headers: {

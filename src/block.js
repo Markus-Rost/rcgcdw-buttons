@@ -19,7 +19,8 @@ export async function blockUser(wiki, context, user, reason = '', forceRefresh =
 			user, reason, expiry,
 			nocreate: true, autoblock: true,
 			token: tokens.csrftoken,
-			assert: 'user', errorformat: 'plaintext',
+			assert: 'user', errorlang: 'en',
+			errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
 		},
 		headers: {

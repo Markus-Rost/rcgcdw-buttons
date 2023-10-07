@@ -16,7 +16,8 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 		form: {
 			action: 'delete', pageid, reason,
 			token: tokens.csrftoken,
-			assert: 'user', errorformat: 'plaintext',
+			assert: 'user', errorlang: 'en',
+			errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
 		},
 		headers: {
