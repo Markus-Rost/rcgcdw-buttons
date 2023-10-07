@@ -29,7 +29,7 @@
 	"rollback_error_alreadyrolled": "Fehler: Der Benutzer war nicht der letzte, der diese Seite bearbeitet hat, oder es gab keine Änderungen, die zurückgesetzt werden können!",
 	"rollback_error_onlyauthor": "Fehler: Der Benutzer ist der einzige Bearbeiter dieser Seite!",
 	"rollback_success": "Erfolg: Die Seite wurde zurückgesetzt!",
-	"undo_error": "Fehler: Fehler beim rückgängig machen der Bearbeitung!",
+	"undo_error": "Fehler: Fehler beim Rückgängigmachen der Bearbeitung!",
 	"undo_error_editconflict": "Fehler: Es gab einen Bearbeitungskonflikt. Bitte versuche es erneut!",
 	"undo_error_undofailure": "Fehler: Die Bearbeitung konnte wegen widersprüchlicher Zwischenbearbeitungen nicht rückgängig gemacht werden!",
 	"undo_success": "Erfolg: Die Bearbeitung wurde rückgängig gemacht!"
