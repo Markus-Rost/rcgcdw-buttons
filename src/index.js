@@ -23,6 +23,7 @@ export async function buttons(interaction, result = {data: {}}) {
 	else if ( hostname.endsWith( '.miraheze.org' ) || customDomainWikis.miraheze.has(hostname) ) oauthSite = 'miraheze';
 	else if ( hostname.endsWith( '.wikitide.com' ) || customDomainWikis.wikitide.has(hostname) ) oauthSite = 'wikitide';
 	else if ( hostname.endsWith( '.telepedia.net' ) ) oauthSite = 'telepedia';
+	else if ( hostname.endsWith( '.minecraft.wiki' ) ) oauthSite = 'minecraft.wiki';
 	if ( !enabledOAuth2.has(oauthSite) ) {
 		result.type = 4;
 		result.data.content = getMessage(interaction.locale, 'error_unknown_site');
