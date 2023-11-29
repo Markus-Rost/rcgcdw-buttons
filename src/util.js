@@ -82,7 +82,7 @@ if ( process.env.oauth_wikitide && process.env.oauth_wikitide_secret ) {
 	enabledOAuth2.set('wikitide', {
 		id: 'wikitide',
 		script: '/w/',
-		url: 'https://meta.wikitide.com/w/'
+		url: 'https://meta.wikitide.org/w/'
 	});
 }
 if ( process.env.oauth_telepedia && process.env.oauth_telepedia_secret ) {
@@ -244,7 +244,7 @@ got.get( 'https://raw.githubusercontent.com/miraheze/ssl/master/certs.yaml', {
 }, error => {
 	console.log( `- Error while getting the Miraheze wikis: ${error}` );
 } );
-got.get( 'https://raw.githubusercontent.com/WikiForge/ssl/master/certs.yaml', {
+got.get( 'https://raw.githubusercontent.com/WikiTideOrg/ssl/master/certs.yaml', {
 	responseType: 'text',
 	throwHttpErrors: true
 } ).then( response => {
