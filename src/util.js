@@ -248,8 +248,8 @@ got.get( 'https://raw.githubusercontent.com/WikiTideOrg/ssl/master/certs.yaml', 
 	responseType: 'text',
 	throwHttpErrors: true
 } ).then( response => {
-	if ( !response?.body?.includes?.( '# WikiTide' ) ) return;
-	response.body.split('# WikiTide')[1].match(/(?<=url: ')[a-z0-9.-]+(?=')/g).forEach( wiki => customDomainWikis.wikitide.add(wiki) );
+	if ( !response?.body?.includes?.( '# Production' ) ) return;
+	response.body.split('# Production')[1].match(/(?<=url: ')[a-z0-9.-]+(?=')/g).forEach( wiki => customDomainWikis.wikitide.add(wiki) );
 }, error => {
 	console.log( `- Error while getting the WikiTide wikis: ${error}` );
 } );
