@@ -6,10 +6,11 @@ import { getToken } from './token.js';
  * @param {Context} context
  * @param {String} pageid
  * @param {String} [reason]
+ * @param {String} [expiry]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<String>}
  */
-export async function blockUser(wiki, context, user, reason = '', expiry, forceRefresh = false) {
+export async function blockUser(wiki, context, user, reason = '', expiry = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return context.get('block_error');
 	expiry ||= ( /^#\d+$/.test(user) ? 'never' : '2 weeks' );

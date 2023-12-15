@@ -123,9 +123,9 @@ export async function buttons(interaction, result = {data: {}}) {
  */
 async function actions(interaction, wiki, context) {
 	var parts = interaction.data.custom_id.split(' ');
-	var components = interaction.data.components?.map( row => row.components ) || [];
-	var reason = components.find( component => component.custom_id === 'reason' )?.value || '';
-	var expiry = components.find( component => component.custom_id === 'expiry' )?.value || '';
+	var components = interaction.data.components?.flatMap( row => row.components ) || [];
+	var reason = components.find( component => component.custom_id === 'reason' )?.value?.trim() || '';
+	var expiry = components.find( component => component.custom_id === 'expiry' )?.value?.trim() || '';
 	var message = {
 		content: context.get('error_modified_message'),
 		flags: 1 << 6,
