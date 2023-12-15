@@ -1,6 +1,7 @@
 {
 	"block_error": "Fehler: Fehler beim Sperren des Benutzers!",
 	"block_error_alreadyblocked": "Fehler: Der Benutzer ist bereits gesperrt!",
+	"block_error_invalidexpiry": "Fehler: Die Sperrdauer ist ungültig!",
 	"block_success": "Erfolg: Der Benutzer wurde gesperrt!",
 	"delete_error": "Fehler: Fehler beim Löschen der Seite!",
 	"delete_success": "Erfolg: Die Seite wurde gelöscht!",
@@ -17,6 +18,7 @@
 	"modal_action_move": "Seite zurück verschieben",
 	"modal_action_rollback": "Seite zurücksetzen",
 	"modal_action_undo": "Änderung rückgängig machen",
+	"modal_expiry": "Sperrdauer",
 	"modal_reason": "Grund",
 	"modal_reason_default": "(standardmäßig automatisch generierter Grund)",
 	"move_error": "Fehler: Fehler beim Zurückverschieben der Seite!",
