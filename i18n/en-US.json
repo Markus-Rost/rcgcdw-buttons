@@ -1,6 +1,7 @@
 {
 	"block_error": "Error: I ran into an error while trying to block the user!",
 	"block_error_alreadyblocked": "Error: The user is already blocked!",
+	"block_error_invalidexpiry": "Error: The expiration time is invalid!",
 	"block_success": "Success: The user has been blocked!",
 	"delete_error": "Error: I ran into an error while trying to delete the page!",
 	"delete_success": "Success: The page has been deleted!",
@@ -17,6 +18,7 @@
 	"modal_action_move": "Move page back",
 	"modal_action_rollback": "Rollback page",
 	"modal_action_undo": "Undo edit",
+	"modal_expiry": "Expiration",
 	"modal_reason": "Reason",
 	"modal_reason_default": "(default auto generated reason)",
 	"move_error": "Error: I ran into an error while trying to move the page back!",

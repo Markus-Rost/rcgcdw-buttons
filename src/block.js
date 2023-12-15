@@ -9,15 +9,16 @@ import { getToken } from './token.js';
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<String>}
  */
-export async function blockUser(wiki, context, user, reason = '', forceRefresh = false) {
+export async function blockUser(wiki, context, user, reason = '', expiry, forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return context.get('block_error');
-	let expiry = ( /^#\d+$/.test(user) ? 'never' : '2 weeks' );
+	expiry ||= ( /^#\d+$/.test(user) ? 'never' : '2 weeks' );
 	return got.post( `${wiki}api.php`, {
 		form: {
 			action: 'block',
 			user, reason, expiry,
-			nocreate: true, autoblock: true,
+			anononly: true, nocreate: true,
+			autoblock: true, allowusertalk: true,
 			token: tokens.csrftoken,
 			assert: 'user', errorlang: 'en',
 			errorformat: 'plaintext',
@@ -31,10 +32,13 @@ export async function blockUser(wiki, context, user, reason = '', forceRefresh =
 		if ( response.statusCode !== 200 || !body?.block?.id ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
-					return blockUser(wiki, context, user, reason, true);
+					return blockUser(wiki, context, user, reason, expiry, true);
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
-					return blockUser(wiki, context, user, reason, true);
+					return blockUser(wiki, context, user, reason, expiry, true);
+				}
+				if ( body.errors.some( error => error.code === 'invalidexpiry' ) ) {
+					return context.get('block_error_invalidexpiry');
 				}
 				if ( body.errors.some( error => error.code === 'alreadyblocked' ) ) {
 					return context.get('block_error_alreadyblocked');

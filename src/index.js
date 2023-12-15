@@ -49,6 +49,23 @@ export async function buttons(interaction, result = {data: {}}) {
 				}]
 			}]
 		};
+		if ( api.expiryAction.includes( parts[1] ) ) {
+			let expiry = ( /^#\d+$/.test(parts.slice(2).join(' ')) ? 'never' : '2 weeks' );
+			result.data.components.push({
+				type: 1,
+				components: [{
+					type: 4,
+					custom_id: 'expiry',
+					style: 1,
+					label: getMessage(interaction.locale, 'modal_expiry'),
+					min_length: 0,
+					max_length: 500,
+					required: false,
+					placeholder: expiry,
+					value: expiry
+				}]
+			});
+		}
 		return;
 	}
 	var wiki = `https://${hostname}${parts[0]}`;
@@ -106,9 +123,9 @@ export async function buttons(interaction, result = {data: {}}) {
  */
 async function actions(interaction, wiki, context) {
 	var parts = interaction.data.custom_id.split(' ');
-	var reason = interaction.data.components?.find( row => {
-		return row.components?.find?.( component => component.custom_id === 'reason' );
-	} )?.components.find( component => component.custom_id === 'reason' )?.value || '';
+	var components = interaction.data.components?.map( row => row.components ) || [];
+	var reason = components.find( component => component.custom_id === 'reason' )?.value || '';
+	var expiry = components.find( component => component.custom_id === 'expiry' )?.value || '';
 	var message = {
 		content: context.get('error_modified_message'),
 		flags: 1 << 6,
@@ -119,7 +136,7 @@ async function actions(interaction, wiki, context) {
 	};
 	switch ( parts[1] ) {
 		case 'block':
-			message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason);
+			message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry);
 			break;
 		case 'delete':
 			if ( /^\d+$/.test(parts[2]) ) message.content = await api.delete(wiki, context, parts[2], reason);

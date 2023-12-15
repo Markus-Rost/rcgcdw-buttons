@@ -6,3 +6,4 @@ export { undoPage as undo } from './undo.js';
 export { revertFile as filerevert } from './filerevert.js';
 export const allowedAction = ['block', 'delete', 'move', 'rollback', 'undo', 'file'];
 export const autocommentAction = ['rollback', 'undo'];
+export const expiryAction = ['block'];
