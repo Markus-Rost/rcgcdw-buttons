@@ -33,6 +33,7 @@
 	"rollback_success": "Success: The page has been rolled back!",
 	"undo_error": "Error: I ran into an error while trying to undo the edit!",
 	"undo_error_editconflict": "Error: I ran into an edit conflict, please try again!",
+	"undo_error_nochange": "Error: The edit has already been undone!",
 	"undo_error_undofailure": "Error: The edit couldn't be undone due to conflicting intermediate edits!",
 	"undo_success": "Success: The edit has been undone!"
 }
