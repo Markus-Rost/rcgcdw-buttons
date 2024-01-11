@@ -1,5 +1,4 @@
-import { randomBytes } from 'node:crypto';
-import { REDIRECT_URI_WIKI, getMessage, db, enabledOAuth2, oauthVerify, Context, reply, customDomainWikis } from './util.js';
+import { getMessage, db, enabledOAuth2, RefreshTokenError, Context, reply, sendButton, customDomainWikis } from './util.js';
 import * as api from './api.js';
 
 /** 
@@ -82,37 +81,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		console.log( `- Error while getting the OAuth2 token: ${dberror}` );
 		return Promise.reject();
 	} ).catch( () => {
-		let state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')} ${wiki}`;
-		while ( oauthVerify.has(state) ) {
-			state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')} ${wiki}`;
-		}
-		oauthVerify.set(state, {userId, interaction});
-		let oauthURL = `${wiki}rest.php/oauth2/authorize?` + new URLSearchParams({
-			response_type: 'code', state,
-			redirect_uri: REDIRECT_URI_WIKI,
-			client_id: process.env[`oauth_${oauthSite}`]
-		}).toString();
-		let message = {
-			content: `[${getMessage(interaction.locale, 'oauth_message')}](<${oauthURL}>)`,
-			components: [{
-				type: 1,
-				components: [{
-					type: 2,
-					label: getMessage(interaction.locale, 'oauth_button'),
-					style: 5,
-					url: oauthURL,
-					emoji: {
-						id: null,
-						name: '🔗'
-					}
-				}]
-			}],
-			flags: 1 << 6,
-			allowed_mentions: {
-				parse: []
-			}
-		};
-		return reply(interaction, message);
+		return sendButton(interaction, userId, oauthSite, wiki);
 	} );
 }
 
@@ -126,33 +95,41 @@ async function actions(interaction, wiki, context) {
 	var components = interaction.data.components?.flatMap( row => row.components ) || [];
 	var reason = components.find( component => component.custom_id === 'reason' )?.value?.trim() || '';
 	var expiry = components.find( component => component.custom_id === 'expiry' )?.value?.trim() || '';
-	var message = {
-		content: context.get('error_modified_message'),
-		flags: 1 << 6,
-		components: [],
-		allowed_mentions: {
-			parse: []
+	try {
+		var message = {
+			content: context.get('error_modified_message'),
+			flags: 1 << 6,
+			components: [],
+			allowed_mentions: {
+				parse: []
+			}
+		};
+		switch ( parts[1] ) {
+			case 'block':
+				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry);
+				break;
+			case 'delete':
+				if ( /^\d+$/.test(parts[2]) ) message.content = await api.delete(wiki, context, parts[2], reason);
+				break;
+			case 'move':
+				if ( /^\d+$/.test(parts[2]) ) message.content = await api.move(wiki, context, parts[2], parts.slice(3).join(' '), reason);
+				break;
+			case 'rollback':
+				if ( /^\d+$/.test(parts[2]) ) message.content = await api.rollback(wiki, context, parts[2], parts.slice(3).join(' '), reason);
+				break;
+			case 'file':
+				if ( /^\d+$/.test(parts[2]) && /^\d+$/.test(parts[3]) ) message.content = await api.filerevert(wiki, context, parts[2], parts[3], reason);
+				break;
+			case 'undo':
+				if ( /^\d+$/.test(parts[2]) && /^\d+$/.test(parts[3]) ) message.content = await api.undo(wiki, context, parts[2], parts[3], reason);
+				break;
 		}
-	};
-	switch ( parts[1] ) {
-		case 'block':
-			message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry);
-			break;
-		case 'delete':
-			if ( /^\d+$/.test(parts[2]) ) message.content = await api.delete(wiki, context, parts[2], reason);
-			break;
-		case 'move':
-			if ( /^\d+$/.test(parts[2]) ) message.content = await api.move(wiki, context, parts[2], parts.slice(3).join(' '), reason);
-			break;
-		case 'rollback':
-			if ( /^\d+$/.test(parts[2]) ) message.content = await api.rollback(wiki, context, parts[2], parts.slice(3).join(' '), reason);
-			break;
-		case 'file':
-			if ( /^\d+$/.test(parts[2]) && /^\d+$/.test(parts[3]) ) message.content = await api.filerevert(wiki, context, parts[2], parts[3], reason);
-			break;
-		case 'undo':
-			if ( /^\d+$/.test(parts[2]) && /^\d+$/.test(parts[3]) ) message.content = await api.undo(wiki, context, parts[2], parts[3], reason);
-			break;
+		reply(interaction, message);
 	}
-	reply(interaction, message);
+	catch ( error ) {
+		if ( error instanceof RefreshTokenError ) {
+			return sendButton(interaction, context.userId, context.site, wiki);
+		}
+		throw error;
+	}
 }

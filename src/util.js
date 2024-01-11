@@ -1,4 +1,5 @@
 import { readdir } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { createRequire } from 'node:module';
 import gotDefault from 'got';
 import { gotSsrf } from 'got-ssrf';
@@ -110,6 +111,23 @@ if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] )
 /** @type {Map<String, {userId: String, interaction: Object}>} */
 export const oauthVerify = new Map();
 
+/**
+ * Error due to invalid refresh token.
+ * @class RefreshTokenError
+ * @extends Error
+ */
+export class RefreshTokenError extends Error {
+	/**
+	 * Creates a refresh token error.
+	 * @param {String} message - A human-readable description of the error.
+	 * @constructs RefreshTokenError
+	 */
+	constructor(message) {
+		super(message);
+		this.name = 'RefreshTokenError';
+	}
+}
+
 /** @type {Map<String, Context>} */
 const contextCache = new Map();
 
@@ -168,6 +186,7 @@ export class Context {
 	 * Refreshes the context tokens.
 	 * @param {String} wiki
 	 * @returns {Promise<Boolean>}
+	 * @throws {RefreshTokenError}
 	 */
 	async refresh(wiki) {
 		if ( !process.env[`oauth_${this.site}`] && !process.env[`oauth_${this.site}_secret`] ) return false;
@@ -189,6 +208,9 @@ export class Context {
 					console.log( `- Error while deleting the OAuth2 token for ${this.userId} on ${this.site}: ${dberror}` );
 				} );
 				contextCache.delete(`${this.userId} ${this.site}`);
+				if ( response.statusCode === 401 && body?.error === 'invalid_request' && body.message === 'The refresh token is invalid.' ) {
+					throw new RefreshTokenError(body.message);
+				}
 				return false;
 			}
 			this.accessToken = body.access_token;
@@ -210,6 +232,10 @@ export class Context {
 	};
 }
 
+/** 
+ * @param {Object} interaction
+ * @param {Object} message
+ */
 export function reply(interaction, message) {
 	if ( !message.components ) message.components = [];
 	got.patch( `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
@@ -218,6 +244,46 @@ export function reply(interaction, message) {
 	} ).catch( error => {
 		console.log( `- Error while replying to the interaction: ${error}` );
 	} );
+}
+
+/** 
+ * @param {Object} interaction
+ * @param {String} userId
+ * @param {String} oauthSite
+ * @param {String} wiki
+ */
+export function sendButton(interaction, userId, oauthSite, wiki) {
+	let state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')} ${wiki}`;
+	while ( oauthVerify.has(state) ) {
+		state = `${oauthSite} ${Date.now().toString(16)}${randomBytes(16).toString('hex')} ${wiki}`;
+	}
+	oauthVerify.set(state, {userId, interaction});
+	let oauthURL = `${wiki}rest.php/oauth2/authorize?` + new URLSearchParams({
+		response_type: 'code', state,
+		redirect_uri: REDIRECT_URI_WIKI,
+		client_id: process.env[`oauth_${oauthSite}`]
+	}).toString();
+	let message = {
+		content: `[${getMessage(interaction.locale, 'oauth_message')}](<${oauthURL}>)`,
+		components: [{
+			type: 1,
+			components: [{
+				type: 2,
+				label: getMessage(interaction.locale, 'oauth_button'),
+				style: 5,
+				url: oauthURL,
+				emoji: {
+					id: null,
+					name: '🔗'
+				}
+			}]
+		}],
+		flags: 1 << 6,
+		allowed_mentions: {
+			parse: []
+		}
+	};
+	return reply(interaction, message);
 }
 
 /**

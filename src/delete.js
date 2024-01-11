@@ -1,4 +1,4 @@
-import { got, Context, parseErrors } from './util.js';
+import { got, RefreshTokenError, Context, parseErrors } from './util.js';
 import { getToken } from './token.js';
 
 /** 
@@ -8,6 +8,7 @@ import { getToken } from './token.js';
  * @param {String} [reason]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<String>}
+ * @throws {RefreshTokenError}
  */
 export async function deletePage(wiki, context, pageid, reason = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);

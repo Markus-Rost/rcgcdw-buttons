@@ -1,4 +1,4 @@
-import { got, Context, parseErrors } from './util.js';
+import { got, RefreshTokenError, Context, parseErrors } from './util.js';
 
 /** @type {Map<String, {csrftoken?: String, rollbacktoken?: String}>} */
 const tokenCache = new Map();
@@ -9,6 +9,7 @@ const tokenCache = new Map();
  * @param {String} [type]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<{csrftoken?: String, rollbacktoken?: String}?>}
+ * @throws {RefreshTokenError}
  */
 export async function getToken(wiki, context, type = 'csrf', forceRefresh = false) {
 	let cacheKey = `${wiki} ${context.userId} ${context.site}`;
