@@ -1,6 +1,7 @@
 {
 	"block_error": "Erro: encontrei um erro ao tentar bloquear o usuário!",
 	"block_error_alreadyblocked": "Erro: O usuário já está bloqueado!",
+	"block_error_invalidexpiry": "Erro: O tempo de expiração é inválido!",
 	"block_success": "Sucesso: O usuário foi bloqueado!",
 	"delete_error": "Erro: encontrei um erro ao tentar excluir a página!",
 	"delete_success": "Sucesso: A página foi excluída!",
@@ -16,6 +17,7 @@
 	"modal_action_filerevert": "Reverter versão do arquivo",
 	"modal_action_rollback": "Reverter página",
 	"modal_action_undo": "Desfazer edição",
+	"modal_expiry": "Expiração",
 	"modal_reason": "Motivo",
 	"modal_reason_default": "(motivo padrão gerado automaticamente)",
 	"move_error": "Erro: encontrei um erro ao tentar mover a página de volta!",
@@ -30,6 +32,7 @@
 	"rollback_success": "Sucesso: A página foi revertida!",
 	"undo_error": "Erro: encontrei um erro ao tentar desfazer a edição!",
 	"undo_error_editconflict": "Erro: encontrei um conflito de edição, tente novamente!",
+	"undo_error_nochange": "Erro: A edição já foi desfeita!",
 	"undo_error_undofailure": "Erro: a edição não pôde ser desfeita devido a edições intermediárias conflitantes!",
 	"undo_success": "Sucesso: A edição foi desfeita!"
 }
