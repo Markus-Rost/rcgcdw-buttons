@@ -123,7 +123,6 @@ const server = createServer( (req, res) => {
 		let url = oauthSite.url;
 		if ( new RegExp( `^https://[a-z0-9\\.-]*\\b${oauthSite.id}\\b.*/$` ).test(site[2]) ) url = site[2];
 		else if ( oauthSite.id === 'miraheze' && customDomainWikis.miraheze.has(site[2]?.split('/')[2]) ) url = site[2];
-		else if ( oauthSite.id === 'wikitide' && customDomainWikis.wikitide.has(site[2]?.split('/')[2]) ) url = site[2];
 		return got.post( `${url}rest.php/oauth2/access_token`, {
 			form: {
 				grant_type: 'authorization_code',
