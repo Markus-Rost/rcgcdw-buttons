@@ -45,8 +45,9 @@ const server = createServer( (req, res) => {
 				return res.end();
 			}
 			try {
+				/** @type {import('discord-api-types/v10').APIInteraction} */
 				var interaction = JSON.parse(rawBody);
-				res.statusCode = 200;
+				/** @type {import('discord-api-types/v10').APIInteractionResponse} */
 				var result = {
 					data: {
 						flags: 1 << 6,

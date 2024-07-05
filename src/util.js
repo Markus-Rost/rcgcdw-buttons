@@ -101,7 +101,7 @@ if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] )
 	});
 }
 
-/** @type {Map<String, {userId: String, interaction: Object}>} */
+/** @type {Map<String, {userId: String, interaction: import('discord-api-types/v10').APIMessageComponentGuildInteraction|import('discord-api-types/v10').APIModalSubmitGuildInteraction}>} */
 export const oauthVerify = new Map();
 
 /**
@@ -226,8 +226,8 @@ export class Context {
 }
 
 /** 
- * @param {Object} interaction
- * @param {Object} message
+ * @param {import('discord-api-types/v10').APIMessageComponentGuildInteraction|import('discord-api-types/v10').APIModalSubmitGuildInteraction} interaction
+ * @param {import('discord-api-types/v10').APIInteractionResponseCallbackData} message
  */
 export function reply(interaction, message) {
 	if ( !message.components ) message.components = [];
@@ -240,7 +240,7 @@ export function reply(interaction, message) {
 }
 
 /** 
- * @param {Object} interaction
+ * @param {import('discord-api-types/v10').APIMessageComponentGuildInteraction|import('discord-api-types/v10').APIModalSubmitGuildInteraction} interaction
  * @param {String} userId
  * @param {String} oauthSite
  * @param {String} wiki
@@ -256,6 +256,7 @@ export function sendButton(interaction, userId, oauthSite, wiki) {
 		redirect_uri: REDIRECT_URI_WIKI,
 		client_id: process.env[`oauth_${oauthSite}`]
 	}).toString();
+	/** @type {import('discord-api-types/v10').APIInteractionResponseCallbackData} */
 	let message = {
 		content: `[${getMessage(interaction.locale, 'oauth_message')}](<${oauthURL}>)`,
 		components: [{

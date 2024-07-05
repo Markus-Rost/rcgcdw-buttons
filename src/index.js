@@ -2,8 +2,8 @@ import { getMessage, db, enabledOAuth2, RefreshTokenError, Context, reply, sendB
 import * as api from './api.js';
 
 /** 
- * @param {Object} interaction
- * @param {Object} [result]
+ * @param {import('discord-api-types/v10').APIMessageComponentGuildInteraction|import('discord-api-types/v10').APIModalSubmitGuildInteraction} interaction
+ * @param {import('discord-api-types/v10').APIModalInteractionResponse} [result]
  */
 export async function buttons(interaction, result = {data: {}}) {
 	var parts = interaction.data.custom_id.split(' ');
@@ -11,7 +11,7 @@ export async function buttons(interaction, result = {data: {}}) {
 	if ( !hostname ) hostname = interaction.message?.content?.match?.(/\]\(<?https:\/\/([^\/<>\[\]() ]+)\/[^<>() ]+>?\)/)?.[1];
 	if ( !hostname ) hostname = interaction.message?.embeds?.[0]?.description?.match?.(/\]\(<?https:\/\/([^\/<>\[\]() ]+)\/[^<>() ]+>?\)/)?.[1];
 	var userId = interaction.member?.user?.id;
-	if ( !hostname || !userId || !parts[0].startsWith( '/' ) || !parts[0].endsWith( '/' ) || !api.allowedAction.includes( parts[1] ) ) {
+	if ( !hostname || !userId || !parts[0].startsWith( '/' ) || !parts[0].endsWith( '/' ) || !api.allowedAction.has( parts[1] ) ) {
 		result.type = 4;
 		result.data.content = getMessage(interaction.locale, 'error_modified_message');
 		return;
@@ -28,7 +28,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		return;
 	}
 	parts[0] = enabledOAuth2.get(oauthSite).script || parts[0];
-	if ( interaction.type !== 5 ) {
+	if ( interaction.type !== 5 && api.commentAction.has( parts[1] ) ) {
 		result.type = 9;
 		result.data = {
 			custom_id: interaction.data.custom_id,
@@ -43,11 +43,11 @@ export async function buttons(interaction, result = {data: {}}) {
 					min_length: 0,
 					max_length: 500,
 					required: false,
-					placeholder: ( api.autocommentAction.includes( parts[1] ) ? getMessage(interaction.locale, 'modal_reason_default') : '' )
+					placeholder: ( api.autocommentAction.has( parts[1] ) ? getMessage(interaction.locale, 'modal_reason_default') : '' )
 				}]
 			}]
 		};
-		if ( api.expiryAction.includes( parts[1] ) ) {
+		if ( api.expiryAction.has( parts[1] ) ) {
 			let expiry = ( /^#\d+$/.test(parts.slice(2).join(' ')) ? 'never' : '2 weeks' );
 			result.data.components.push({
 				type: 1,
@@ -85,16 +85,18 @@ export async function buttons(interaction, result = {data: {}}) {
 }
 
 /** 
- * @param {Object} interaction
+ * @param {import('discord-api-types/v10').APIMessageComponentGuildInteraction|import('discord-api-types/v10').APIModalSubmitGuildInteraction} interaction
  * @param {String} wiki
  * @param {Context} context
  */
 async function actions(interaction, wiki, context) {
 	var parts = interaction.data.custom_id.split(' ');
+	/** @type {import('discord-api-types/v10').ModalSubmitComponent[]} */
 	var components = interaction.data.components?.flatMap( row => row.components ) || [];
 	var reason = components.find( component => component.custom_id === 'reason' )?.value?.trim() || '';
 	var expiry = components.find( component => component.custom_id === 'expiry' )?.value?.trim() || '';
 	try {
+		/** @type {import('discord-api-types/v10').APIInteractionResponseCallbackData} */
 		var message = {
 			content: context.get('error_modified_message'),
 			flags: 1 << 6,
@@ -104,6 +106,9 @@ async function actions(interaction, wiki, context) {
 			}
 		};
 		switch ( parts[1] ) {
+			case 'thank':
+				if ( api.thankAction.has( parts[2] ) && /^\d+$/.test(parts[3]) ) message.content = await api.thank(wiki, context, parts[2], parts[3]);
+				break;
 			case 'block':
 				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry);
 				break;
