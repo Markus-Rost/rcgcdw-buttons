@@ -33,6 +33,7 @@
 	"rollback_error_onlyauthor": "Fehler: Der Benutzer ist der einzige Bearbeiter dieser Seite!",
 	"rollback_success": "Erfolg: Die Seite wurde zurückgesetzt!",
 	"thank_error": "Fehler: Es gab einen Fehler beim Bedanken!",
+	"thank_error_invalidlogtype": "Fehler: Du kannst für diese Aktion nicht danken!",
 	"thank_error_invalidrecipient": "Fehler: Du kannst dem Benutzer für diese Aktion nicht danken!",
 	"thank_success": "Erfolg: Dem Benutzer wurde gedankt!",
 	"undo_error": "Fehler: Es gab einen Fehler beim Rückgängigmachen der Bearbeitung!",
