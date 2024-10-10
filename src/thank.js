@@ -45,6 +45,9 @@ export async function thankUser(wiki, context, actiontype, actionid, forceRefres
 				if ( body.errors.some( error => error.code === 'invalidrecipient' ) ) {
 					return context.get('thank_error_invalidrecipient');
 				}
+				if ( body.errors.some( error => error.code === 'thanks-error-invalid-log-type' ) ) {
+					return context.get('thank_error_invalidlogtype');
+				}
 			}
 			console.log( `- ${response.statusCode}: Error while thanking on ${wiki}: ${parseErrors(response)}` );
 			return context.get('thank_error');
