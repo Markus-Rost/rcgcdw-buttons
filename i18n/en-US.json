@@ -14,6 +14,7 @@
 	"filerevert_error": "Error: I ran into an error while trying to revert the file version!",
 	"filerevert_success": "Success: The file version has been reverted!",
 	"modal_action_block": "Block user",
+	"modal_action_blocknotalk": "Block user (disable talk)",
 	"modal_action_delete": "Delete page",
 	"modal_action_filerevert": "Revert file version",
 	"modal_action_move": "Move page back",

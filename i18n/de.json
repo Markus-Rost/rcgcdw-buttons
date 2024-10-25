@@ -14,6 +14,7 @@
 	"filerevert_error": "Fehler: Es gab einen Fehler beim Zurücksetzen der Dateiversion!",
 	"filerevert_success": "Erfolg: Die Dateiversion wurde zurückgesetzt!",
 	"modal_action_block": "Benutzer sperren",
+	"modal_action_blocknotalk": "Benutzer sperren (inclusive Diskussion)",
 	"modal_action_delete": "Seite löschen",
 	"modal_action_filerevert": "Dateiversion zurücksetzen",
 	"modal_action_move": "Seite zurück verschieben",
