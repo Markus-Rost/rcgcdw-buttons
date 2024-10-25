@@ -11,21 +11,24 @@ import { getToken } from './token.js';
  * @returns {Promise<String>}
  * @throws {RefreshTokenError}
  */
-export async function blockUser(wiki, context, user, reason = '', expiry = '', forceRefresh = false) {
+export async function blockUser(wiki, context, user, reason = '', expiry = '', allowusertalk = true, forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return context.get('block_error');
 	expiry ||= ( /^#\d+$/.test(user) ? 'never' : '2 weeks' );
+	let formData = {
+		action: 'block',
+		user, reason, expiry,
+		anononly: true,
+		nocreate: true,
+		autoblock: true,
+		token: tokens.csrftoken,
+		assert: 'user', errorlang: 'en',
+		errorformat: 'plaintext',
+		formatversion: 2, format: 'json'
+	};
+	if ( allowusertalk ) formData.allowusertalk = true;
 	return got.post( `${wiki}api.php`, {
-		form: {
-			action: 'block',
-			user, reason, expiry,
-			anononly: true, nocreate: true,
-			autoblock: true, allowusertalk: true,
-			token: tokens.csrftoken,
-			assert: 'user', errorlang: 'en',
-			errorformat: 'plaintext',
-			formatversion: 2, format: 'json'
-		},
+		form: formData,
 		headers: {
 			authorization: `Bearer ${context.accessToken}`
 		}
@@ -34,10 +37,10 @@ export async function blockUser(wiki, context, user, reason = '', expiry = '', f
 		if ( response.statusCode !== 200 || !body?.block?.id ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
-					return blockUser(wiki, context, user, reason, expiry, true);
+					return blockUser(wiki, context, user, reason, expiry, allowusertalk, true);
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
-					return blockUser(wiki, context, user, reason, expiry, true);
+					return blockUser(wiki, context, user, reason, expiry, allowusertalk, true);
 				}
 				if ( body.errors.some( error => error.code === 'invalidexpiry' ) ) {
 					return context.get('block_error_invalidexpiry');

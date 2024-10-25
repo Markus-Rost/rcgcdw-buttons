@@ -110,7 +110,10 @@ async function actions(interaction, wiki, context) {
 				if ( api.thankAction.has( parts[2] ) && /^\d+$/.test(parts[3]) ) message.content = await api.thank(wiki, context, parts[2], parts[3]);
 				break;
 			case 'block':
-				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry);
+				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry, true);
+				break;
+			case 'blocknotalk':
+				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry, false);
 				break;
 			case 'delete':
 				if ( /^\d+$/.test(parts[2]) ) message.content = await api.delete(wiki, context, parts[2], reason);
