@@ -31,6 +31,9 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
 					return revertFile(wiki, context, pageids, timestamp, comment, true);
 				}
+				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
+					throw context.revoke();
+				}
 			}
 			console.log( `- ${response.statusCode}: Error while getting the file name on ${wiki}: ${parseErrors(response)}` );
 			return context.get('filerevert_error');
@@ -54,6 +57,9 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 				if ( body?.errors?.length ) {
 					if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
 						return revertFile(wiki, context, pageids, timestamp, comment, true);
+					}
+					if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
+						throw context.revoke();
 					}
 					if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 						return revertFile(wiki, context, pageids, timestamp, comment, true);

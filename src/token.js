@@ -34,6 +34,9 @@ export async function getToken(wiki, context, type = 'csrf', forceRefresh = fals
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
 					return getToken(wiki, context, type, true);
 				}
+				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
+					throw context.revoke();
+				}
 			}
 			console.log( `- ${response.statusCode}: Error while getting the token on ${wiki}: ${parseErrors(response)}` );
 			return;

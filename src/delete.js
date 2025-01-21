@@ -31,6 +31,9 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
 					return deletePage(wiki, context, pageid, reason, true);
 				}
+				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
+					throw context.revoke();
+				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return deletePage(wiki, context, pageid, reason, true);
 				}
