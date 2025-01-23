@@ -1,10 +1,8 @@
 import { readdir } from 'node:fs';
 import { randomBytes } from 'node:crypto';
-import { createRequire } from 'node:module';
 import gotDefault from 'got';
 import { gotSsrf } from 'got-ssrf';
 import pg from 'pg';
-const require = createRequire(import.meta.url);
 
 globalThis.isDebug = ( process.argv[2] === 'debug' );
 export const REDIRECT_URI_WIKI = new URL(process.env.wiki_path, process.env.redirect_uri).href;
@@ -13,8 +11,8 @@ export const REDIRECT_URI_WIKI = new URL(process.env.wiki_path, process.env.redi
 const allLangs = new Map();
 readdir( './i18n', (error, files) => {
 	if ( error ) return error;
-	files.filter( file => file.endsWith('.json') ).forEach( file => {
-		var translations = require(`../i18n/${file}`);
+	files.filter( file => file.endsWith('.json') ).forEach( async file => {
+		var translations = ( await import(`../i18n/${file}`, {with: {type: 'json'}}) ).default;
 		var lang = file.slice(0, -5);
 		allLangs.set(lang, new Map(Object.entries(translations)));
 	} );
