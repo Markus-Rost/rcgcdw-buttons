@@ -84,6 +84,13 @@ if ( process.env.oauth_telepedia && process.env.oauth_telepedia_secret ) {
 		url: 'https://meta.telepedia.net/'
 	});
 }
+if ( process.env.oauth_wikioasis && process.env.oauth_wikioasis_secret ) {
+	enabledOAuth2.set('wikioasis', {
+		id: 'wikioasis',
+		script: '/',
+		url: 'https://meta.wikioasis.org/'
+	});
+}
 if ( process.env['oauth_minecraft.wiki'] && process.env['oauth_minecraft.wiki_secret'] ) {
 	enabledOAuth2.set('minecraft.wiki', {
 		id: 'minecraft.wiki',
