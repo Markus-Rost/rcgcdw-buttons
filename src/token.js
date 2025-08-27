@@ -1,7 +1,16 @@
-import { got, RefreshTokenError, Context, parseErrors } from './util.js';
+import { got, mwMessageCache, RefreshTokenError, Context, parseErrors } from './util.js';
 
 /** @type {Map<String, {csrftoken?: String, rollbacktoken?: String}>} */
 const tokenCache = new Map();
+
+const ammessages = [
+	'ipboptions',
+	'ipbreason-dropdown',
+	'deletereason-dropdown',
+	'filerevert-defaultcomment',
+	'revertpage',
+	'undo-summary',
+].join('|');
 
 /** 
  * @param {String} wiki
@@ -19,7 +28,8 @@ export async function getToken(wiki, context, type = 'csrf', forceRefresh = fals
 	}
 	return got.get( `${wiki}api.php`, {
 		searchParams: {
-			action: 'query', meta: 'tokens', type,
+			action: 'query', meta: 'tokens|allmessages',
+			type, ammessages, amenableparser: true,
 			assert: 'user', errorlang: 'en',
 			errorformat: 'plaintext',
 			formatversion: 2, format: 'json'
@@ -40,6 +50,13 @@ export async function getToken(wiki, context, type = 'csrf', forceRefresh = fals
 			}
 			console.log( `- ${response.statusCode}: Error while getting the token on ${wiki}: ${parseErrors(response)}` );
 			return;
+		}
+		if ( body.query.allmessages?.length ) {
+			let messages = body.query.allmessages.reduce( (messages, msg) => {
+				messages[msg.normalizedname || msg.name] = msg.content;
+			}, {} );
+			if ( mwMessageCache.has(wiki) ) Object.assign(tokenCache.get(cacheKey), messages);
+			else mwMessageCache.set(wiki, messages);
 		}
 		if ( tokenCache.has(cacheKey) ) return Object.assign(tokenCache.get(cacheKey), body.query.tokens);
 		tokenCache.set(cacheKey, body.query.tokens);

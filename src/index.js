@@ -1,4 +1,4 @@
-import { getMessage, db, enabledOAuth2, RefreshTokenError, Context, reply, sendButton, customDomainWikis } from './util.js';
+import { getMessage, db, enabledOAuth2, mwMessageCache, RefreshTokenError, Context, reply, sendButton, customDomainWikis } from './util.js';
 import * as api from './api.js';
 
 /** 
@@ -29,45 +29,107 @@ export async function buttons(interaction, result = {data: {}}) {
 		return;
 	}
 	parts[0] = enabledOAuth2.get(oauthSite).script || parts[0];
+	var wiki = `https://${hostname}${parts[0]}`;
 	if ( interaction.type !== 5 && api.commentAction.has( parts[1] ) ) {
+		let commentDropdown = api.commentDropdown.get( parts[1] );
 		result.type = 9;
 		result.data = {
 			custom_id: interaction.data.custom_id,
 			title: getMessage(interaction.locale, `modal_action_${parts[1]}`),
-			components: [{
-				type: 1,
-				components: [{
-					type: 4,
-					custom_id: 'reason',
-					style: 1,
-					label: getMessage(interaction.locale, 'modal_reason'),
-					min_length: 0,
-					max_length: 500,
-					required: false,
-					placeholder: ( api.autocommentAction.has( parts[1] ) ? getMessage(interaction.locale, 'modal_reason_default') : '' )
-				}]
-			}]
+			components: []
 		};
-		if ( api.expiryAction.has( parts[1] ) ) {
-			let expiry = ( /^#\d+$/.test(parts.slice(2).join(' ')) ? 'never' : '2 weeks' );
+		let commentOptions = [];
+		if ( commentDropdown ) {
+			commentOptions = ( mwMessageCache.get(wiki)?.[commentDropdown] || '' ).split('\n').filter( option => option.startsWith( '**' ) ).map( option => {
+				option = option.slice(2).trim().slice(0, 100);
+				return {
+					label: option,
+					value: option,
+					default: false
+				}
+			} ).slice(0, 24);
 			result.data.components.push({
-				type: 1,
-				components: [{
-					type: 4,
+				type: 18,
+				label: getMessage(interaction.locale, 'modal_reason'),
+				component: {
+					type: 3,
+					custom_id: 'reason',
+					min_values: 1,
+					max_values: 1,
+					required: true,
+					options: [
+						...commentOptions,
+						{
+							label: getMessage(interaction.locale, 'modal_reason_other'),
+							value: 'other',
+							default: true,
+							emoji: {id: null, name: '📝'}
+						}
+					]
+				}
+			});
+		}
+		result.data.components.push({
+			type: 18,
+			label: getMessage(interaction.locale, ( commentOptions.length ? 'modal_reason_other' : 'modal_reason') ),
+			component: {
+				type: 4,
+				custom_id: 'reason_other',
+				style: 1,
+				min_length: 0,
+				max_length: 500,
+				required: false,
+				placeholder: ( api.autocommentAction.has( parts[1] ) ? getMessage(interaction.locale, 'modal_reason_default') : '' )
+			}
+		});
+		if ( api.expiryAction.has( parts[1] ) ) {
+			let expiry = ( /^#\d+$/.test(parts.slice(2).join(' ')) ? 'infinite' : '2 weeks' );
+			let expiryOptions = ( mwMessageCache.get(wiki)?.ipboptions || '2 hours:2 hours,1 day:1 day,3 days:3 days,1 week:1 week,2 weeks:2 weeks,1 month:1 month,3 months:3 months,6 months:6 months,1 year:1 year,indefinite:infinite' ).split(',').map( option => {
+				let [label, value] = option.split(':');
+				label = label.trim().slice(0, 100);
+				value = value.trim().slice(0, 100);
+				return {
+					label, value,
+					description: ( label === value ? null : value ),
+					default: value === expiry
+				}
+			} ).filter( (_, i, all) => i < 23 || i === all.length - 1 );
+			result.data.components.push({
+				type: 18,
+				label: getMessage(interaction.locale, 'modal_expiry'),
+				component: {
+					type: 3,
 					custom_id: 'expiry',
+					min_values: 1,
+					max_values: 1,
+					required: true,
+					options: [
+						...expiryOptions,
+						{
+							label: getMessage(interaction.locale, 'modal_expiry_other'),
+							value: 'other',
+							default: !expiryOptions.some( option => option.default ),
+							emoji: {id: null, name: '📝'}
+						}
+					]
+				}
+			}, {
+				type: 18,
+				label: getMessage(interaction.locale, 'modal_expiry_other'),
+				component: {
+					type: 4,
+					custom_id: 'expiry_other',
 					style: 1,
-					label: getMessage(interaction.locale, 'modal_expiry'),
 					min_length: 0,
 					max_length: 500,
 					required: false,
-					placeholder: expiry,
-					value: expiry
-				}]
+					placeholder: '',
+					value: ( expiryOptions.some( option => option.default ) ? '' : expiry )
+				}
 			});
 		}
 		return;
 	}
-	var wiki = `https://${hostname}${parts[0]}`;
 	result.type = 5;
 	let cacheKey = `${userId} ${oauthSite}`;
 	if ( Context._cache.has(cacheKey) ) {
@@ -93,9 +155,13 @@ export async function buttons(interaction, result = {data: {}}) {
 async function actions(interaction, wiki, context) {
 	var parts = interaction.data.custom_id.split(' ');
 	/** @type {import('discord-api-types/v10').ModalSubmitComponent[]} */
-	var components = interaction.data.components?.flatMap( row => row.components ) || [];
-	var reason = components.find( component => component.custom_id === 'reason' )?.value?.trim() || '';
-	var expiry = components.find( component => component.custom_id === 'expiry' )?.value?.trim() || '';
+	var components = interaction.data.components?.map( row => row.component ) || [];
+	var reason = components.find( component => component.custom_id === 'reason' )?.values?.[0]?.trim() || '';
+	var reasonOther = components.find( component => component.custom_id === 'reason_other' )?.value?.trim() || '';
+	if ( reason && reasonOther ) reason += ': ';
+	reason += reasonOther;
+	var expiry = components.find( component => component.custom_id === 'expiry' )?.values?.[0]?.trim() || 'other';
+	if ( expiry === 'other' ) expiry = components.find( component => component.custom_id === 'expiry_other' )?.value?.trim() || '';
 	try {
 		/** @type {import('discord-api-types/v10').APIInteractionResponseCallbackData} */
 		var message = {

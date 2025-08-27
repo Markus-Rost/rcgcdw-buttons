@@ -10,3 +10,8 @@ export const commentAction = new Set(['block', 'blocknotalk', 'delete', 'move', 
 export const autocommentAction = new Set(['rollback', 'undo']);
 export const expiryAction = new Set(['block', 'blocknotalk']);
 export const thankAction = new Set(['rev', 'log']);
+export const commentDropdown = new Map([
+	['block', 'ipbreason-dropdown'],
+	['blocknotalk', 'ipbreason-dropdown'],
+	['delete', 'deletereason-dropdown']
+]);

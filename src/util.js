@@ -109,6 +109,9 @@ if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] )
 /** @type {Map<String, {userId: String, interaction: import('discord-api-types/v10').APIMessageComponentGuildInteraction|import('discord-api-types/v10').APIModalSubmitGuildInteraction}>} */
 export const oauthVerify = new Map();
 
+/** @type {Map<String, {[Message: String]: String}>} */
+export const mwMessageCache = new Map();
+
 /**
  * Error due to invalid refresh token.
  * @class RefreshTokenError
