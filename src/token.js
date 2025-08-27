@@ -54,6 +54,7 @@ export async function getToken(wiki, context, type = 'csrf', forceRefresh = fals
 		if ( body.query.allmessages?.length ) {
 			let messages = body.query.allmessages.reduce( (messages, msg) => {
 				messages[msg.normalizedname || msg.name] = msg.content;
+				return messages;
 			}, {} );
 			if ( mwMessageCache.has(wiki) ) Object.assign(tokenCache.get(cacheKey), messages);
 			else mwMessageCache.set(wiki, messages);
