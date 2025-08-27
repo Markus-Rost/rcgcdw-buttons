@@ -48,7 +48,7 @@ export async function buttons(interaction, result = {data: {}}) {
 					default: false
 				}
 			} ).slice(0, 24);
-			result.data.components.push({
+			if ( commentOptions.length ) result.data.components.push({
 				type: 18,
 				label: getMessage(interaction.locale, 'modal_reason'),
 				component: {
@@ -62,8 +62,7 @@ export async function buttons(interaction, result = {data: {}}) {
 						{
 							label: getMessage(interaction.locale, 'modal_reason_other'),
 							value: 'other',
-							default: true,
-							emoji: {id: null, name: '📝'}
+							default: true
 						}
 					]
 				}
@@ -87,7 +86,7 @@ export async function buttons(interaction, result = {data: {}}) {
 			let expiryOptions = ( mwMessageCache.get(wiki)?.ipboptions || '2 hours:2 hours,1 day:1 day,3 days:3 days,1 week:1 week,2 weeks:2 weeks,1 month:1 month,3 months:3 months,6 months:6 months,1 year:1 year,indefinite:infinite' ).split(',').map( option => {
 				let [label, value] = option.split(':');
 				label = label.trim().slice(0, 100);
-				value = value.trim().slice(0, 100);
+				value = value.trim().slice(0, 100) || label;
 				return {
 					label, value,
 					description: ( label === value ? null : value ),
@@ -108,8 +107,7 @@ export async function buttons(interaction, result = {data: {}}) {
 						{
 							label: getMessage(interaction.locale, 'modal_expiry_other'),
 							value: 'other',
-							default: !expiryOptions.some( option => option.default ),
-							emoji: {id: null, name: '📝'}
+							default: !expiryOptions.some( option => option.default )
 						}
 					]
 				}
