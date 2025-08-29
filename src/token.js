@@ -56,7 +56,7 @@ export async function getToken(wiki, context, type = 'csrf', forceRefresh = fals
 				messages[msg.normalizedname || msg.name] = msg.content;
 				return messages;
 			}, {} );
-			if ( mwMessageCache.has(wiki) ) Object.assign(tokenCache.get(cacheKey), messages);
+			if ( mwMessageCache.has(wiki) ) Object.assign(mwMessageCache.get(wiki), messages);
 			else mwMessageCache.set(wiki, messages);
 		}
 		if ( tokenCache.has(cacheKey) ) return Object.assign(tokenCache.get(cacheKey), body.query.tokens);
