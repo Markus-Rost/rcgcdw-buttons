@@ -7,6 +7,7 @@ import { getToken } from './token.js';
  * @param {String} pageid
  * @param {String} [reason]
  * @param {String} [expiry]
+ * @param {Boolean} [allowusertalk]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<String>}
  * @throws {RefreshTokenError}

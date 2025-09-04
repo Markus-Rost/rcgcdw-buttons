@@ -156,6 +156,7 @@ async function actions(interaction, wiki, context) {
 	var components = interaction.data.components?.map( row => row.component ) || [];
 	var reason = components.find( component => component.custom_id === 'reason' )?.values?.[0]?.trim() || '';
 	var reasonOther = components.find( component => component.custom_id === 'reason_other' )?.value?.trim() || '';
+	if ( reason === 'other' ) reason = '';
 	if ( reason && reasonOther ) reason += ': ';
 	reason += reasonOther;
 	var expiry = components.find( component => component.custom_id === 'expiry' )?.values?.[0]?.trim() || 'other';
