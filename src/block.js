@@ -4,7 +4,7 @@ import { getToken } from './token.js';
 /** 
  * @param {String} wiki
  * @param {Context} context
- * @param {String} pageid
+ * @param {String} user
  * @param {String} [reason]
  * @param {String} [expiry]
  * @param {Boolean} [allowusertalk]
@@ -15,7 +15,7 @@ import { getToken } from './token.js';
 export async function blockUser(wiki, context, user, reason = '', expiry = '', allowusertalk = true, forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return context.get('block_error');
-	expiry ||= ( /^#\d+$/.test(user) ? 'never' : '2 weeks' );
+	expiry ||= ( /^#\d+$/.test(user) ? 'infinite' : '2 weeks' );
 	let formData = {
 		action: 'block',
 		user, reason, expiry,

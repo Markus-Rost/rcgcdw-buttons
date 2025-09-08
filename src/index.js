@@ -30,6 +30,7 @@ export async function buttons(interaction, result = {data: {}}) {
 	}
 	parts[0] = enabledOAuth2.get(oauthSite).script || parts[0];
 	var wiki = `https://${hostname}${parts[0]}`;
+	if ( api.metaAction.has( parts[1] ) ) wiki = enabledOAuth2.get(oauthSite).url
 	if ( interaction.type !== 5 && api.commentAction.has( parts[1] ) ) {
 		let commentDropdown = api.commentDropdown.get( parts[1] );
 		result.type = 9;
@@ -174,6 +175,9 @@ async function actions(interaction, wiki, context) {
 		switch ( parts[1] ) {
 			case 'thank':
 				if ( api.thankAction.has( parts[2] ) && /^\d+$/.test(parts[3]) ) message.content = await api.thank(wiki, context, parts[2], parts[3]);
+				break;
+			case 'gblock':
+				message.content = await api.gblock(wiki, context, parts.slice(2).join(' '), reason, expiry);
 				break;
 			case 'block':
 				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry, true);

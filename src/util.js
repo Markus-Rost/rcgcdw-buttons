@@ -95,7 +95,7 @@ if ( process.env['oauth_minecraft.wiki'] && process.env['oauth_minecraft.wiki_se
 	enabledOAuth2.set('minecraft.wiki', {
 		id: 'minecraft.wiki',
 		script: '/',
-		url: 'https://minecraft.wiki/'
+		url: 'https://meta.minecraft.wiki/'
 	});
 }
 if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] ) {
@@ -304,11 +304,15 @@ export function sendButton(interaction, userId, oauthSite, wiki) {
 }
 
 /**
- * @param {import('got').Response<{errors:{code:String,text:String}[]}>} response
+ * @param {import('got').Response<({errors:{code:String,text:String}[],error:{[a:String]:{code:String,message:String}[]}})>} response
  * @returns {String}
  */
 export function parseErrors(response) {
 	let error = response?.body?.errors?.map( error => `${error.code}: ${error.text}` ).join(' - ');
+	if ( !error && response?.body?.error ) {
+		let errors = Object.keys( response.body.error ).flatMap( errorCat => response.body.error[errorCat] );
+		error = errors.map( error => `${error.code}: ${error.message}` ).join(' - ');
+	}
 	if ( !error ) error = response?.headers?.['mediawiki-api-error'] || response?.statusMessage;
 	return error || '';
 }
