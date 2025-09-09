@@ -20,6 +20,7 @@
 	"modal_action_blocknotalk": "Block user (disable talk)",
 	"modal_action_delete": "Delete page",
 	"modal_action_filerevert": "Revert file version",
+	"modal_action_gblock": "Globally block user",
 	"modal_action_move": "Move page back",
 	"modal_action_rollback": "Rollback page",
 	"modal_action_undo": "Undo edit",

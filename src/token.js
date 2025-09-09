@@ -8,6 +8,7 @@ const ammessages = [
 	'ipbreason-dropdown',
 	'deletereason-dropdown',
 	'filerevert-defaultcomment',
+	'globalblocking-block-reason-dropdown',
 	'revertpage',
 	'undo-summary',
 ].join('|');

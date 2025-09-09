@@ -20,6 +20,7 @@
 	"modal_action_blocknotalk": "Benutzer sperren (inclusive Diskussion)",
 	"modal_action_delete": "Seite löschen",
 	"modal_action_filerevert": "Dateiversion zurücksetzen",
+	"modal_action_gblock": "Benutzer global sperren",
 	"modal_action_move": "Seite zurück verschieben",
 	"modal_action_rollback": "Seite zurücksetzen",
 	"modal_action_undo": "Änderung rückgängig machen",

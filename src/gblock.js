@@ -52,7 +52,6 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 		form: {
 			action: 'globalblock',
 			target, reason, expiry,
-			anononly: true,
 			'enable-autoblock': true,
 			token: tokens.csrftoken,
 			assert: 'user', errorlang: 'en',
