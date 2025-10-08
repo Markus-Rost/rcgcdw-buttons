@@ -46,7 +46,7 @@ export const db = new pg.Pool().on( 'error', dberror => {
 export const got = gotDefault.extend( {
 	throwHttpErrors: false,
 	timeout: {
-		request: 5000
+		request: 8000
 	},
 	headers: {
 		'user-agent': 'Recent Changes Revert Actions/' + ( isDebug ? 'testing' : process.env.npm_package_version ) + ' (Discord; ' + process.env.npm_package_name + ( process.env.invite ? '; ' + process.env.invite : '' ) + '; OAuth2)'

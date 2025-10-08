@@ -15,7 +15,16 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return context.get('gblock_error');
 	expiry ||= ( /^#\d+$/.test(target) ? 'infinite' : '2 weeks' );
+	let formData = {
+		action: 'globalblock',
+		target, reason, expiry,
+		token: tokens.csrftoken,
+		assert: 'user', errorlang: 'en',
+		errorformat: 'plaintext',
+		formatversion: 2, format: 'json'
+	};
 	if ( /^#\d+$/.test(target) ) {
+		formData['enable-autoblock'] = true;
 		let result = await got.get( `${wiki}api.php`, {
 			searchParams: {
 				action: 'query', list: 'users',
@@ -42,6 +51,7 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 				return context.get('gblock_error');
 			}
 			target = body.query.users[0].name;
+			formData.target = target;
 		}, error => {
 			console.log( `- Error while getting the username on ${wiki}: ${error}` );
 			return context.get('gblock_error');
@@ -49,15 +59,7 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 		if ( result ) return result;
 	}
 	return got.post( `${wiki}api.php`, {
-		form: {
-			action: 'globalblock',
-			target, reason, expiry,
-			'enable-autoblock': true,
-			token: tokens.csrftoken,
-			assert: 'user', errorlang: 'en',
-			errorformat: 'plaintext',
-			formatversion: 2, format: 'json'
-		},
+		form: formData,
 		headers: {
 			authorization: `Bearer ${context.accessToken}`
 		}
