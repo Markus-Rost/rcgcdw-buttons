@@ -321,12 +321,12 @@ export function parseErrors(response) {
 export const customDomainWikis = {
 	miraheze: new Set()
 };
-got.get( 'https://raw.githubusercontent.com/miraheze/ssl/master/certs.yaml', {
+got.get( 'https://raw.githubusercontent.com/miraheze/ssl/refs/heads/main/cloudflare_domains', {
 	responseType: 'text',
 	throwHttpErrors: true
 } ).then( response => {
-	if ( !response?.body?.includes?.( '# Production' ) ) return;
-	response.body.split('# Production')[1].match(/(?<=url: ')[a-z0-9.-]+(?=')/g).forEach( wiki => customDomainWikis.miraheze.add(wiki) );
+	if ( !response?.body?.includes?.( '\nwiki.animalroyale.com\n' ) ) return;
+	response.body.split('\n').forEach( wiki => customDomainWikis.miraheze.add(wiki) );
 }, error => {
 	console.log( `- Error while getting the Miraheze wikis: ${error}` );
 } );

@@ -15,6 +15,7 @@
 	"filerevert_success": "Success: The file version has been reverted!",
 	"gblock_error": "Error: I ran into an error while trying to globally block the user!",
 	"gblock_error_alreadyblocked": "Error: The user is already globally blocked!",
+	"gblock_error_reason": "Error: You need to provide a reason for the global block!",
 	"gblock_success": "Success: The user has been globally blocked!",
 	"modal_action_block": "Block user",
 	"modal_action_blocknotalk": "Block user (disable talk)",

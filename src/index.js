@@ -59,12 +59,12 @@ export async function buttons(interaction, result = {data: {}}) {
 					max_values: 1,
 					required: true,
 					options: [
-						...commentOptions,
 						{
 							label: getMessage(interaction.locale, 'modal_reason_other'),
 							value: 'other',
 							default: true
-						}
+						},
+						...commentOptions
 					]
 				}
 			});

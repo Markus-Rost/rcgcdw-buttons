@@ -46,6 +46,9 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 					if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 						throw context.revoke();
 					}
+					if ( body.errors.some( error => error.code === 'missingparam' && error.text === 'The "reason" parameter must be set.' ) ) {
+						return context.get('gblock_error_reason');
+					}
 				}
 				console.log( `- ${response.statusCode}: Error while getting the username on ${wiki}: ${parseErrors(response)}` );
 				return context.get('gblock_error');
