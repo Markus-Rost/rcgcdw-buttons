@@ -39,6 +39,12 @@ export async function thankUser(wiki, context, actiontype, actionid, forceRefres
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return thankUser(wiki, context, actiontype, actionid, true);
 				}
+				if ( body.errors.some( error => error.code === 'blocked' ) ) {
+					return context.get('error_blocked');
+				}
+				if ( body.errors.some( error => error.code === 'ratelimited' ) ) {
+					return context.get('error_ratelimited');
+				}
 				if ( body.errors.some( error => error.code === 'badvalue' ) ) {
 					return context.get('error_extension');
 				}

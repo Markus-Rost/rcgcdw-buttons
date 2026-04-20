@@ -64,6 +64,12 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 					if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 						return revertFile(wiki, context, pageids, timestamp, comment, true);
 					}
+					if ( body.errors.some( error => error.code === 'blocked' ) ) {
+						return context.get('error_blocked');
+					}
+					if ( body.errors.some( error => error.code === 'ratelimited' ) ) {
+						return context.get('error_ratelimited');
+					}
 					if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected'].includes( error.code ) ) ) {
 						return context.get('error_permissiondenied');
 					}

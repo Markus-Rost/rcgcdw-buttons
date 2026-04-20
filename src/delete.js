@@ -37,6 +37,12 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return deletePage(wiki, context, pageid, reason, true);
 				}
+				if ( body.errors.some( error => error.code === 'blocked' ) ) {
+					return context.get('error_blocked');
+				}
+				if ( body.errors.some( error => error.code === 'ratelimited' ) ) {
+					return context.get('error_ratelimited');
+				}
 				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid', 'cantdelete'].includes( error.code ) ) ) {
 					return context.get('error_missingtitle');
 				}

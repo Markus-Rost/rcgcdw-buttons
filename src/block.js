@@ -46,6 +46,12 @@ export async function blockUser(wiki, context, user, reason = '', expiry = '', a
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return blockUser(wiki, context, user, reason, expiry, allowusertalk, true);
 				}
+				if ( body.errors.some( error => error.code === 'blocked' ) ) {
+					return context.get('error_blocked');
+				}
+				if ( body.errors.some( error => error.code === 'ratelimited' ) ) {
+					return context.get('error_ratelimited');
+				}
 				if ( body.errors.some( error => error.code === 'invalidexpiry' ) ) {
 					return context.get('block_error_invalidexpiry');
 				}

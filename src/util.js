@@ -98,6 +98,13 @@ if ( process.env['oauth_minecraft.wiki'] && process.env['oauth_minecraft.wiki_se
 		url: 'https://meta.minecraft.wiki/'
 	});
 }
+if ( process.env['oauth_cookierun.wiki'] && process.env['oauth_cookierun.wiki_secret'] ) {
+	enabledOAuth2.set('cookierun.wiki', {
+		id: 'cookierun.wiki',
+		script: '/mw/',
+		url: 'https://cookierun.wiki/mw/'
+	});
+}
 if ( process.env['oauth_lakeus.xyz'] && process.env['oauth_lakeus.xyz_secret'] ) {
 	enabledOAuth2.set('lakeus.xyz', {
 		id: 'lakeus.xyz',

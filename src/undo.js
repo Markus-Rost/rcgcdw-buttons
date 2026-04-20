@@ -40,6 +40,12 @@ export async function undoPage(wiki, context, pageid, undo, summary = '', forceR
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return undoPage(wiki, context, pageid, undo, summary, true);
 				}
+				if ( body.errors.some( error => error.code === 'blocked' ) ) {
+					return context.get('error_blocked');
+				}
+				if ( body.errors.some( error => error.code === 'ratelimited' ) ) {
+					return context.get('error_ratelimited');
+				}
 				if ( body.errors.some( error => ['missingtitle', 'nosuchpageid', 'nosuchrevid'].includes( error.code ) ) ) {
 					return context.get('error_missingtitle');
 				}

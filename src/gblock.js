@@ -14,6 +14,7 @@ import { getToken } from './token.js';
 export async function gblockUser(wiki, context, target, reason = '', expiry = '', forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return context.get('gblock_error');
+	if ( !reason ) return context.get('gblock_error_reason');
 	expiry ||= ( /^#\d+$/.test(target) ? 'infinite' : '2 weeks' );
 	let formData = {
 		action: 'globalblock',
@@ -46,9 +47,6 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 					if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 						throw context.revoke();
 					}
-					if ( body.errors.some( error => error.code === 'missingparam' && error.text === 'The "reason" parameter must be set.' ) ) {
-						return context.get('gblock_error_reason');
-					}
 				}
 				console.log( `- ${response.statusCode}: Error while getting the username on ${wiki}: ${parseErrors(response)}` );
 				return context.get('gblock_error');
@@ -78,6 +76,15 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return gblockUser(wiki, context, target, reason, expiry, true);
+				}
+				if ( body.errors.some( error => error.code === 'missingparam' && error.text === 'The "reason" parameter must be set.' ) ) {
+					return context.get('gblock_error_reason');
+				}
+				if ( body.errors.some( error => error.code === 'blocked' ) ) {
+					return context.get('error_blocked');
+				}
+				if ( body.errors.some( error => error.code === 'ratelimited' ) ) {
+					return context.get('error_ratelimited');
 				}
 				if ( body.errors.some( error => error.code === 'badexpiry' ) ) {
 					return context.get('block_error_invalidexpiry');
