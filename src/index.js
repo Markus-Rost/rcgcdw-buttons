@@ -73,7 +73,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		result.data.components.push({
 			type: 18,
 			label: getMessage(interaction.locale, ( commentOptions.length ? 'modal_reason_other' : 'modal_reason') ),
-			description: ( parts[1] === 'gblock' ? getMessage(interaction.locale, 'modal_reason_required') : '' ),
+			description: ( parts[1] === 'gblock' ? getMessage(interaction.locale, 'modal_reason_required') : null ),
 			component: {
 				type: 4,
 				custom_id: 'reason_other',
@@ -189,22 +189,6 @@ export async function buttons(interaction, result = {data: {}}) {
 							default: false
 						}
 					]
-				}
-			});
-		}
-		if ( parts[1] === 'move' && false ) {
-			result.data.components.push({
-				type: 18,
-				label: getMessage(interaction.locale, 'modal_expiry_other'),
-				component: {
-					type: 4,
-					custom_id: 'expiry_other',
-					style: 1,
-					min_length: 0,
-					max_length: 500,
-					required: false,
-					placeholder: '',
-					value: ( expiryOptions.some( option => option.default ) ? '' : expiry )
 				}
 			});
 		}
