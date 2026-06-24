@@ -78,7 +78,9 @@ const server = createServer( (req, res) => {
 					got.post( `https://discord.com/api/v10/interactions/${interaction.id}/${interaction.token}/callback`, {
 						json: result,
 						throwHttpErrors: true
-					} ).catch( error => {
+					} ).then( response => {
+						console.log( `- Test while responding to the interaction: ${response.body}` );
+					}, error => {
 						console.log( `- Error while responding to the interaction: ${error}` );
 					} );
 					response = '{"result": "Success"}';
