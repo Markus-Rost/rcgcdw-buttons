@@ -33,7 +33,6 @@
 	"modal_block_hidename": "Hide username from edits and lists",
 	"modal_block_hidename_desc": "Only for indefinite blocks, requires `hideuser` permission",
 	"modal_block_nocreate": "Account creation",
-	"modal_block_options": "Additional options",
 	"modal_block_reblock": "Overwrite existing block",
 	"modal_expiry": "Expiration",
 	"modal_expiry_other": "Other time",

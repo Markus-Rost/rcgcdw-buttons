@@ -130,28 +130,6 @@ export async function buttons(interaction, result = {data: {}}) {
 			});
 		}
 		if ( api.blockAction.has( parts[1] ) ) {
-			result.data.components.unshift({
-				type: 18,
-				label: getMessage(interaction.locale, 'modal_block_details' ),
-				component: {
-					type: 22,
-					custom_id: 'block_details',
-					min_values: 0,
-					required: false,
-					options: [
-						{
-							label: getMessage(interaction.locale, 'modal_block_nocreate'),
-							value: 'nocreate',
-							default: true
-						},
-						{
-							label: getMessage(interaction.locale, 'modal_block_disallowusertalk'),
-							value: 'disallowusertalk',
-							default: false
-						}
-					]
-				}
-			});
 			let blockOptions = [];
 			if ( parts[1] === 'blockhideuser' ) {
 				blockOptions.push({
@@ -170,13 +148,23 @@ export async function buttons(interaction, result = {data: {}}) {
 			}
 			result.data.components.push({
 				type: 18,
-				label: getMessage(interaction.locale, 'modal_block_options' ),
+				label: getMessage(interaction.locale, 'modal_block_details' ),
 				component: {
 					type: 22,
-					custom_id: 'block_options',
+					custom_id: 'block_details',
 					min_values: 0,
 					required: false,
 					options: [
+						{
+							label: getMessage(interaction.locale, 'modal_block_nocreate'),
+							value: 'nocreate',
+							default: true
+						},
+						{
+							label: getMessage(interaction.locale, 'modal_block_disallowusertalk'),
+							value: 'disallowusertalk',
+							default: false
+						},
 						{
 							label: getMessage(interaction.locale, 'modal_block_autoblock'),
 							value: 'autoblock',
@@ -246,9 +234,7 @@ async function actions(interaction, wiki, context) {
 				break;
 			case 'block':
 			case 'blockhideuser':
-				let blockOptions = [];
-				blockOptions.push(...components.find( component => component.custom_id === 'block_details' )?.values ?? [])
-				blockOptions.push(...components.find( component => component.custom_id === 'block_options' )?.values ?? [])
+				let blockOptions = components.find( component => component.custom_id === 'block_details' )?.values ?? [];
 				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry, blockOptions);
 				break;
 			case 'delete':
