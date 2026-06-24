@@ -14,7 +14,6 @@
 	"filerevert_error": "Kesalahan: Saya mengalami kesalahan saat mencoba mengembalikan versi file!",
 	"filerevert_success": "Sukses: Versi file telah dikembalikan!",
 	"modal_action_block": "Blokir pengguna",
-	"modal_action_blocknotalk": "Blokir pengguna (nonaktifkan percakapan)",
 	"modal_action_delete": "Hapus halaman",
 	"modal_action_filerevert": "Hapus halaman",
 	"modal_action_move": "Pindahkan halaman kembali",

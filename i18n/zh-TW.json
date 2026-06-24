@@ -14,7 +14,6 @@
 	"filerevert_error": "錯誤：嘗試回退檔案版本時發生錯誤！",
 	"filerevert_success": "成功：已回退檔案版本！",
 	"modal_action_block": "封鎖使用者",
-	"modal_action_blocknotalk": "封鎖使用者（停用討論頁）",
 	"modal_action_delete": "刪除頁面",
 	"modal_action_filerevert": "回退檔案版本",
 	"modal_action_move": "將頁面移動回去",

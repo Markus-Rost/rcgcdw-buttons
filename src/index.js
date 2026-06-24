@@ -11,6 +11,7 @@ export async function buttons(interaction, result = {data: {}}) {
 	if ( !hostname ) hostname = interaction.message?.content?.match?.(/\]\(<?https:\/\/([^\/<>\[\]() ]+)\/[^<>() ]+>?\)/)?.[1];
 	if ( !hostname ) hostname = interaction.message?.embeds?.[0]?.description?.match?.(/\]\(<?https:\/\/([^\/<>\[\]() ]+)\/[^<>() ]+>?\)/)?.[1];
 	var userId = interaction.member?.user?.id;
+	if ( parts[1] === 'blocknotalk' ) parts[1] = 'block';
 	if ( !hostname || !userId || !parts[0].startsWith( '/' ) || !parts[0].endsWith( '/' ) || !api.allowedAction.has( parts[1] ) ) {
 		result.type = 4;
 		result.data.content = getMessage(interaction.locale, 'error_modified_message');
@@ -32,13 +33,13 @@ export async function buttons(interaction, result = {data: {}}) {
 	var wiki = `https://${hostname}${parts[0]}`;
 	if ( api.metaAction.has( parts[1] ) ) wiki = enabledOAuth2.get(oauthSite).url
 	if ( interaction.type !== 5 && api.commentAction.has( parts[1] ) ) {
-		let commentDropdown = api.commentDropdown.get( parts[1] );
 		result.type = 9;
 		result.data = {
 			custom_id: interaction.data.custom_id,
-			title: getMessage(interaction.locale, `modal_action_${parts[1]}`),
+			title: getMessage(interaction.locale, `modal_action_${parts[1] === 'blockhideuser' ? 'block' : parts[1]}`),
 			components: []
 		};
+		let commentDropdown = api.commentDropdown.get( parts[1] );
 		let commentOptions = [];
 		if ( commentDropdown ) {
 			commentOptions = ( mwMessageCache.get(wiki)?.[commentDropdown] || '' ).split('\n').filter( option => option.startsWith( '**' ) ).map( option => {
@@ -72,6 +73,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		result.data.components.push({
 			type: 18,
 			label: getMessage(interaction.locale, ( commentOptions.length ? 'modal_reason_other' : 'modal_reason') ),
+			description: ( parts[1] === 'gblock' ? getMessage(interaction.locale, 'modal_reason_required') : '' ),
 			component: {
 				type: 4,
 				custom_id: 'reason_other',
@@ -113,6 +115,85 @@ export async function buttons(interaction, result = {data: {}}) {
 					]
 				}
 			}, {
+				type: 18,
+				label: getMessage(interaction.locale, 'modal_expiry_other'),
+				component: {
+					type: 4,
+					custom_id: 'expiry_other',
+					style: 1,
+					min_length: 0,
+					max_length: 500,
+					required: false,
+					placeholder: '',
+					value: ( expiryOptions.some( option => option.default ) ? '' : expiry )
+				}
+			});
+		}
+		if ( api.blockAction.has( parts[1] ) ) {
+			result.data.components.unshift({
+				type: 18,
+				label: getMessage(interaction.locale, 'modal_block_details' ),
+				component: {
+					type: 22,
+					custom_id: 'block_details',
+					min_values: 0,
+					required: false,
+					options: [
+						{
+							label: getMessage(interaction.locale, 'modal_block_nocreate'),
+							value: 'nocreate',
+							default: true
+						},
+						{
+							label: getMessage(interaction.locale, 'modal_block_disallowusertalk'),
+							value: 'disallowusertalk',
+							default: false
+						}
+					]
+				}
+			});
+			let blockOptions = [];
+			if ( parts[1] === 'blockhideuser' ) {
+				blockOptions.push({
+					label: getMessage(interaction.locale, 'modal_block_hidename'),
+					description: getMessage(interaction.locale, 'modal_block_hidename_desc'),
+					value: 'hidename',
+					default: false
+				});
+			}
+			if ( !/^#\d+$/.test(parts.slice(2).join(' ')) ) {
+				blockOptions.push({
+					label: getMessage(interaction.locale, 'modal_block_hardblock'),
+					value: 'hardblock',
+					default: false
+				});
+			}
+			result.data.components.push({
+				type: 18,
+				label: getMessage(interaction.locale, 'modal_block_options' ),
+				component: {
+					type: 22,
+					custom_id: 'block_options',
+					min_values: 0,
+					required: false,
+					options: [
+						{
+							label: getMessage(interaction.locale, 'modal_block_autoblock'),
+							value: 'autoblock',
+							default: true
+						},
+						...blockOptions,
+						{
+							label: getMessage(interaction.locale, 'modal_block_reblock'),
+							value: 'reblock',
+							default: false
+						}
+					]
+				}
+			});
+		}
+		if ( parts[1] === 'move' && false ) {
+			result.data.components.push({
 				type: 18,
 				label: getMessage(interaction.locale, 'modal_expiry_other'),
 				component: {
@@ -180,10 +261,11 @@ async function actions(interaction, wiki, context) {
 				message.content = await api.gblock(wiki, context, parts.slice(2).join(' '), reason, expiry);
 				break;
 			case 'block':
-				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry, true);
-				break;
-			case 'blocknotalk':
-				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry, false);
+			case 'blockhideuser':
+				let blockOptions = [];
+				blockOptions.push(...components.find( component => component.custom_id === 'block_details' )?.values ?? [])
+				blockOptions.push(...components.find( component => component.custom_id === 'block_options' )?.values ?? [])
+				message.content = await api.block(wiki, context, parts.slice(2).join(' '), reason, expiry, blockOptions);
 				break;
 			case 'delete':
 				if ( /^\d+$/.test(parts[2]) ) message.content = await api.delete(wiki, context, parts[2], reason);

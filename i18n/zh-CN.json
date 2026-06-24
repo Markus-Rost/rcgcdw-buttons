@@ -14,7 +14,6 @@
 	"filerevert_error": "错误：试图回退文件版本时发生错误！",
 	"filerevert_success": "成功：已回退文件版本！",
 	"modal_action_block": "封禁用户",
-	"modal_action_blocknotalk": "封禁用户（禁用讨论页）",
 	"modal_action_delete": "删除页面",
 	"modal_action_filerevert": "回退文件版本",
 	"modal_action_move": "将页面移动回去",

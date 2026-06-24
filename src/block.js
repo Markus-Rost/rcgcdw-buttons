@@ -1,33 +1,39 @@
 import { got, RefreshTokenError, Context, parseErrors } from './util.js';
 import { getToken } from './token.js';
 
+/**
+ * @typedef {'nocreate'|'disallowusertalk'|'autoblock'|'hidename'|'hardblock'|'reblock'} BlockOptions
+ */
+
 /** 
  * @param {String} wiki
  * @param {Context} context
  * @param {String} user
  * @param {String} [reason]
  * @param {String} [expiry]
- * @param {Boolean} [allowusertalk]
+ * @param {BlockOptions[]} [blockOptions]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<String>}
  * @throws {RefreshTokenError}
  */
-export async function blockUser(wiki, context, user, reason = '', expiry = '', allowusertalk = true, forceRefresh = false) {
+export async function blockUser(wiki, context, user, reason = '', expiry = '', blockOptions = [], forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'csrf', forceRefresh);
 	if ( !tokens ) return context.get('block_error');
 	expiry ||= ( /^#\d+$/.test(user) ? 'infinite' : '2 weeks' );
 	let formData = {
 		action: 'block',
 		user, reason, expiry,
-		anononly: true,
-		nocreate: true,
-		autoblock: true,
 		token: tokens.csrftoken,
 		assert: 'user', errorlang: 'en',
 		errorformat: 'plaintext',
 		formatversion: 2, format: 'json'
 	};
-	if ( allowusertalk ) formData.allowusertalk = true;
+	if ( blockOptions.includes( 'nocreate' ) ) formData.nocreate = true;
+	if ( !blockOptions.includes( 'disallowusertalk' ) ) formData.allowusertalk = true;
+	if ( blockOptions.includes( 'autoblock' ) ) formData.autoblock = true;
+	if ( blockOptions.includes( 'hidename' ) ) formData.hidename = true;
+	if ( !blockOptions.includes( 'hardblock' ) ) formData.anononly = true;
+	if ( blockOptions.includes( 'reblock' ) ) formData.reblock = true;
 	return got.post( `${wiki}api.php`, {
 		form: formData,
 		headers: {
@@ -58,7 +64,7 @@ export async function blockUser(wiki, context, user, reason = '', expiry = '', a
 				if ( body.errors.some( error => error.code === 'alreadyblocked' ) ) {
 					return context.get('block_error_alreadyblocked');
 				}
-				if ( body.errors.some( error => ['permissiondenied', 'cantblock'].includes( error.code ) ) ) {
+				if ( body.errors.some( error => ['permissiondenied', 'cantblock', 'canthide'].includes( error.code ) ) ) {
 					return context.get('error_permissiondenied');
 				}
 			}
