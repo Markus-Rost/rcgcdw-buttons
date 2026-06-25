@@ -181,7 +181,7 @@ export async function buttons(interaction, result = {data: {}}) {
 				}
 			});
 		}
-		if ( parts[0] === 'rollback' && extendedPerms ) {
+		if ( parts[1] === 'rollback' && extendedPerms ) {
 			result.data.components.push({
 				type: 18,
 				label: getMessage(interaction.locale, 'modal_rollback_markbot' ),
