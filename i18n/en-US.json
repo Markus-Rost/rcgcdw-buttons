@@ -40,6 +40,8 @@
 	"modal_reason_default": "(default auto generated reason)",
 	"modal_reason_other": "Other reason",
 	"modal_reason_required": "Providing a reason is required",
+	"modal_rollback_markbot": "Mark as bot edits",
+	"modal_rollback_markbot_desc": "Mark the reverted edits and the revert as bot edits, requires `markbotedits` permission",
 	"move_error": "Error: I ran into an error while trying to move the page back!",
 	"move_error_articleexists": "Error: There is already a different page under this title!",
 	"move_error_selfmove": "Error: The page is already back under this title!",

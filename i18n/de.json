@@ -40,6 +40,8 @@
 	"modal_reason_default": "(standardmäßig automatisch generierter Grund)",
 	"modal_reason_other": "Anderer Grund",
 	"modal_reason_required": "Es muss ein Grund angegeben werden",
+	"modal_rollback_markbot": "Markiere als Botbearbeitungen",
+	"modal_rollback_markbot_desc": "Markiere die zurückgesetzten Bearbeitungen sowie die Zurücksetzung als Botbearbeitungen",
 	"move_error": "Fehler: Es gab einen Fehler beim Zurückverschieben der Seite!",
 	"move_error_articleexists": "Fehler: Es gibt bereits eine andere Seite unter diesem Titel!",
 	"move_error_selfmove": "Fehler: Die Seite ist bereits zurück unter diesem Titel!",

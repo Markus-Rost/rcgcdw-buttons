@@ -7,22 +7,25 @@ import { getToken } from './token.js';
  * @param {String} pageid
  * @param {String} user
  * @param {String} [summary]
+ * @param {Boolean} [markbot]
  * @param {Boolean} [forceRefresh]
  * @returns {Promise<String>}
  * @throws {RefreshTokenError}
  */
-export async function rollbackPage(wiki, context, pageid, user, summary = '', forceRefresh = false) {
+export async function rollbackPage(wiki, context, pageid, user, summary = '', markbot = false, forceRefresh = false) {
 	let tokens = await getToken(wiki, context, 'rollback', forceRefresh);
 	if ( !tokens ) return context.get('rollback_error');
+	let formData = {
+		action: 'rollback',
+		pageid, user, summary,
+		token: tokens.rollbacktoken,
+		assert: 'user', errorlang: 'en',
+		errorformat: 'plaintext',
+		formatversion: 2, format: 'json'
+	};
+	if ( markbot ) formData.markbot = true;
 	return got.post( `${wiki}api.php`, {
-		form: {
-			action: 'rollback',
-			pageid, user, summary,
-			token: tokens.rollbacktoken,
-			assert: 'user', errorlang: 'en',
-			errorformat: 'plaintext',
-			formatversion: 2, format: 'json'
-		},
+		form: formData,
 		headers: {
 			authorization: `Bearer ${context.accessToken}`
 		}
@@ -31,13 +34,13 @@ export async function rollbackPage(wiki, context, pageid, user, summary = '', fo
 		if ( response.statusCode !== 200 || !body?.rollback?.revid ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
-					return rollbackPage(wiki, context, pageid, user, summary, true);
+					return rollbackPage(wiki, context, pageid, user, summary, markbot, true);
 				}
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 					throw context.revoke();
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
-					return rollbackPage(wiki, context, pageid, user, summary, true);
+					return rollbackPage(wiki, context, pageid, user, summary, markbot, true);
 				}
 				if ( body.errors.some( error => error.code === 'blocked' ) ) {
 					return context.get('error_blocked');

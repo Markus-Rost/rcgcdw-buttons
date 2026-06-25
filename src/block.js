@@ -44,13 +44,13 @@ export async function blockUser(wiki, context, user, reason = '', expiry = '', b
 		if ( response.statusCode !== 200 || !body?.block?.id ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
-					return blockUser(wiki, context, user, reason, expiry, allowusertalk, true);
+					return blockUser(wiki, context, user, reason, expiry, blockOptions, true);
 				}
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 					throw context.revoke();
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
-					return blockUser(wiki, context, user, reason, expiry, allowusertalk, true);
+					return blockUser(wiki, context, user, reason, expiry, blockOptions, true);
 				}
 				if ( body.errors.some( error => error.code === 'blocked' ) ) {
 					return context.get('error_blocked');

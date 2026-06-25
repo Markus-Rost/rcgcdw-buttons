@@ -31,7 +31,8 @@ export async function buttons(interaction, result = {data: {}}) {
 	}
 	parts[0] = enabledOAuth2.get(oauthSite).script || parts[0];
 	var wiki = `https://${hostname}${parts[0]}`;
-	if ( api.metaAction.has( parts[1] ) ) wiki = enabledOAuth2.get(oauthSite).url
+	if ( api.metaAction.has( parts[1] ) ) wiki = enabledOAuth2.get(oauthSite).url;
+	let extendedPerms = ( oauthSite === 'minecraft.wiki' );
 	if ( interaction.type !== 5 && api.commentAction.has( parts[1] ) ) {
 		result.type = 9;
 		result.data = {
@@ -131,7 +132,7 @@ export async function buttons(interaction, result = {data: {}}) {
 		}
 		if ( api.blockAction.has( parts[1] ) ) {
 			let blockOptions = [];
-			if ( parts[1] === 'blockhideuser' ) {
+			if ( parts[1] === 'blockhideuser' && extendedPerms ) {
 				blockOptions.push({
 					label: getMessage(interaction.locale, 'modal_block_hidename'),
 					description: getMessage(interaction.locale, 'modal_block_hidename_desc'),
@@ -177,6 +178,18 @@ export async function buttons(interaction, result = {data: {}}) {
 							default: false
 						}
 					]
+				}
+			});
+		}
+		if ( parts[0] === 'rollback' && extendedPerms ) {
+			result.data.components.push({
+				type: 18,
+				label: getMessage(interaction.locale, 'modal_rollback_markbot' ),
+				description: getMessage(interaction.locale, 'modal_rollback_markbot_desc' ),
+				component: {
+					type: 23,
+					custom_id: 'rollback_markbot',
+					default: false
 				}
 			});
 		}
@@ -244,7 +257,8 @@ async function actions(interaction, wiki, context) {
 				if ( /^\d+$/.test(parts[2]) ) message.content = await api.move(wiki, context, parts[2], parts.slice(3).join(' '), reason);
 				break;
 			case 'rollback':
-				if ( /^\d+$/.test(parts[2]) ) message.content = await api.rollback(wiki, context, parts[2], parts.slice(3).join(' '), reason);
+				let markbot = components.find( component => component.custom_id === 'rollback_markbot' )?.value ?? false;
+				if ( /^\d+$/.test(parts[2]) ) message.content = await api.rollback(wiki, context, parts[2], parts.slice(3).join(' '), reason, markbot);
 				break;
 			case 'file':
 				if ( /^\d+$/.test(parts[2]) && /^\d+$/.test(parts[3]) ) message.content = await api.filerevert(wiki, context, parts[2], parts[3], reason);
