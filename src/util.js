@@ -88,7 +88,7 @@ if ( process.env.oauth_wikioasis && process.env.oauth_wikioasis_secret ) {
 	enabledOAuth2.set('wikioasis', {
 		id: 'wikioasis',
 		script: '/',
-		url: 'https://meta.wikioasis.org/'
+		url: 'https://meta.wikioasis.org/w/'
 	});
 }
 if ( process.env['oauth_minecraft.wiki'] && process.env['oauth_minecraft.wiki_secret'] ) {

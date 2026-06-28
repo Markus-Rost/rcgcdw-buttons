@@ -24,6 +24,7 @@ export async function buttons(interaction, result = {data: {}}) {
 	else if ( hostname.endsWith( '.telepedia.net' ) ) oauthSite = 'telepedia';
 	else if ( hostname.endsWith( '.wikioasis.org' ) ) oauthSite = 'wikioasis';
 	else if ( hostname.endsWith( '.minecraft.wiki' ) ) oauthSite = 'minecraft.wiki';
+	else if ( hostname.endsWith( '.cookierun.wiki' ) ) oauthSite = 'cookierun.wiki';
 	if ( !enabledOAuth2.has(oauthSite) ) {
 		result.type = 4;
 		result.data.content = getMessage(interaction.locale, 'error_unknown_site');
