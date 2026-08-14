@@ -15,7 +15,6 @@
 	"filerevert_success": "成功：已回退文件版本！",
 	"modal_action_block": "封禁用户",
 	"modal_action_delete": "删除页面",
-	"modal_action_filerevert": "回退文件版本",
 	"modal_action_move": "将页面移动回去",
 	"modal_action_rollback": "回滚页面",
 	"modal_action_undo": "撤销编辑",

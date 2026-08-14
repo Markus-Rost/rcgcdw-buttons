@@ -13,7 +13,6 @@
 	"filerevert_success": "Succès : La version du fichier a été annulée !",
 	"modal_action_block": "Bloquer l'utilisateur",
 	"modal_action_delete": "Supprimer la page",
-	"modal_action_filerevert": "Revenir à la version précédente du fichier",
 	"modal_action_move": "Retourner à la page précédente",
 	"modal_action_rollback": "Révoquer les modifications",
 	"modal_action_undo": "Annuler la modification",

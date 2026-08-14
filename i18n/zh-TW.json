@@ -15,7 +15,6 @@
 	"filerevert_success": "成功：已回退檔案版本！",
 	"modal_action_block": "封鎖使用者",
 	"modal_action_delete": "刪除頁面",
-	"modal_action_filerevert": "回退檔案版本",
 	"modal_action_move": "將頁面移動回去",
 	"modal_action_rollback": "復原頁面",
 	"modal_action_undo": "還原編輯",

@@ -14,7 +14,6 @@
 	"filerevert_success": "Sucesso: A versão do arquivo foi revertida!",
 	"modal_action_block": "Bloquear usuário",
 	"modal_action_delete": "Excluir página",
-	"modal_action_filerevert": "Reverter versão do arquivo",
 	"modal_action_rollback": "Reverter página",
 	"modal_action_undo": "Desfazer edição",
 	"modal_expiry": "Expiração",
