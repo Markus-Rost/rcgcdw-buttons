@@ -14,6 +14,7 @@
 	"error_unknown_interaction": "Fehler: Unbekannte Interaktion!",
 	"error_unknown_site": "Fehler: Seite nicht unterstützt!",
 	"filerevert_error": "Fehler: Es gab einen Fehler beim Zurücksetzen der Dateiversion!",
+	"filerevert_error_nochange": "Fehler: Die vorherige Dateiversion stimmt mit der aktuellen Verson überein!",
 	"filerevert_success": "Erfolg: Die Dateiversion wurde zurückgesetzt!",
 	"gblock_error": "Fehler: Es gab einen Fehler beim globalen Sperren des Benutzers!",
 	"gblock_error_alreadyblocked": "Fehler: Der Benutzer ist bereits global gesperrt!",

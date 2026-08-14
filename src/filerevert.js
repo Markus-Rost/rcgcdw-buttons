@@ -70,6 +70,9 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 					if ( body.errors.some( error => error.code === 'ratelimited' ) ) {
 						return context.get('error_ratelimited');
 					}
+					if ( body.errors.some( error => error.code === 'fileexists-no-change' ) ) {
+						return context.get('filerevert_nochange');
+					}
 					if ( body.errors.some( error => ['permissiondenied', 'protectedpage', 'cascadeprotected'].includes( error.code ) ) ) {
 						return context.get('error_permissiondenied');
 					}
