@@ -21,7 +21,7 @@
 	"gblock_success": "Erfolg: Der Benutzer wurde global gesperrt!",
 	"modal_action_block": "Benutzer sperren",
 	"modal_action_delete": "Seite löschen",
-	"modal_action_filerevert": "Dateiversion zurücksetzen",
+	"modal_action_file": "Dateiversion zurücksetzen",
 	"modal_action_gblock": "Benutzer global sperren",
 	"modal_action_move": "Seite zurück verschieben",
 	"modal_action_rollback": "Seite zurücksetzen",

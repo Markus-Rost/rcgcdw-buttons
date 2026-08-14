@@ -21,7 +21,7 @@
 	"gblock_success": "Success: The user has been globally blocked!",
 	"modal_action_block": "Block user",
 	"modal_action_delete": "Delete page",
-	"modal_action_filerevert": "Revert file version",
+	"modal_action_file": "Revert file version",
 	"modal_action_gblock": "Globally block user",
 	"modal_action_move": "Move page back",
 	"modal_action_rollback": "Rollback page",

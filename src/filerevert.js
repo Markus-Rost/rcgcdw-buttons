@@ -38,7 +38,7 @@ export async function revertFile(wiki, context, pageids, timestamp, comment = ''
 			console.log( `- ${response.statusCode}: Error while getting the file name on ${wiki}: ${parseErrors(response)}` );
 			return context.get('filerevert_error');
 		}
-		var filename = body.query.pages[0].title.split(':').slice(1).join(':');
+		var filename = body.query.pages[0].title.split(':').slice(1).join(':').replaceAll(' ', '_');
 		return got.post( `${wiki}api.php`, {
 			form: {
 				action: 'filerevert', comment, filename,
