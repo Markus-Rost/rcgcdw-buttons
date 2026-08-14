@@ -15,7 +15,7 @@
 	"filerevert_success": "Başarılı: Dosya sürümü geri alındı!",
 	"modal_action_block": "Kullanıcıyı engelle",
 	"modal_action_delete": "Sayfayı sil",
-	"modal_action_filerevert": "Dosya sürümünü geri al",
+	"modal_action_file": "Dosya sürümünü geri al",
 	"modal_action_move": "Sayfayı geri taşı",
 	"modal_action_rollback": "Sayfayı geri al",
 	"modal_action_undo": "Düzenelemeyi geri al",

@@ -13,7 +13,7 @@
 	"filerevert_success": "Επιτυχία: Η έκδοση αρχείου έχει ήδη αντιστραφεί!",
 	"modal_action_block": "Αποκλεισμός χρήστη",
 	"modal_action_delete": "Διαγραφή σελίδας",
-	"modal_action_filerevert": "Αντιστροφή έκδοσης αρχείου",
+	"modal_action_file": "Αντιστροφή έκδοσης αρχείου",
 	"modal_action_move": "Μετακίνηση σελίδας πίσω",
 	"modal_action_rollback": "Επαναφορά σελίδας",
 	"modal_action_undo": "Αναίρεση επεξεργασίας",

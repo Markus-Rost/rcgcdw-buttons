@@ -13,7 +13,7 @@
 	"filerevert_success": "Poprawnie wycofano wersję pliku!",
 	"modal_action_block": "Zablokuj użytkownika",
 	"modal_action_delete": "Usuń stronę",
-	"modal_action_filerevert": "Wycofaj wersję pliku",
+	"modal_action_file": "Wycofaj wersję pliku",
 	"modal_action_move": "Przenieś stronę z powrotem",
 	"modal_action_rollback": "Wycofaj edycje",
 	"modal_action_undo": "Wycofaj edycję",
