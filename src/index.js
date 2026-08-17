@@ -243,6 +243,9 @@ async function actions(interaction, wiki, context) {
 			case 'thank':
 				if ( api.thankAction.has( parts[2] ) && /^\d+$/.test(parts[3]) ) message.content = await api.thank(wiki, context, parts[2], parts[3]);
 				break;
+			case 'patrol':
+				if ( /^\d+$/.test(parts[2]) ) message.content = await api.patrol(wiki, context, parts[2]);
+				break;
 			case 'gblock':
 				message.content = await api.gblock(wiki, context, parts.slice(2).join(' '), reason, expiry);
 				break;
