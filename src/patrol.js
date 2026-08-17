@@ -26,7 +26,7 @@ export async function patrolEdit(wiki, context, rcid, forceRefresh = false) {
 		}
 	} ).then( async response => {
 		var body = response.body;
-		if ( response.statusCode !== 200 || !body?.result?.success ) {
+		if ( response.statusCode !== 200 || !body?.patrol?.rcid === rcid ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
 					return patrolEdit(wiki, context, rcid, true);
@@ -62,7 +62,7 @@ export async function patrolEdit(wiki, context, rcid, forceRefresh = false) {
 			console.log( `- ${response.statusCode}: Error while partolling on ${wiki}: ${parseErrors(response)}` );
 			return context.get('patrol_error');
 		}
-		console.log( `${wiki} - ${context.userId} patrolled User:${body.result.recipient}` );
+		console.log( `${wiki} - ${context.userId} patrolled ${body.patrol.rcid} on ${body.patrol.title}` );
 		return context.get('patrol_success');
 	}, error => {
 		console.log( `- Error while patrolling on ${wiki}: ${error}` );
