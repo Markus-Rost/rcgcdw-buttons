@@ -34,6 +34,9 @@ export async function deletePage(wiki, context, pageid, reason = '', forceRefres
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 					throw context.revoke();
 				}
+				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization-not-approved' ) ) {
+					throw context.revoke('The OAuth consumer has not been approved');
+				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return deletePage(wiki, context, pageid, reason, true);
 				}

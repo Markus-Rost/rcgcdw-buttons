@@ -47,6 +47,9 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 					if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 						throw context.revoke();
 					}
+					if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization-not-approved' ) ) {
+						throw context.revoke('The OAuth consumer has not been approved');
+					}
 				}
 				console.log( `- ${response.statusCode}: Error while getting the username on ${wiki}: ${parseErrors(response)}` );
 				return context.get('gblock_error');
@@ -73,6 +76,9 @@ export async function gblockUser(wiki, context, target, reason = '', expiry = ''
 				}
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 					throw context.revoke();
+				}
+				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization-not-approved' ) ) {
+					throw context.revoke('The OAuth consumer has not been approved');
 				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return gblockUser(wiki, context, target, reason, expiry, true);

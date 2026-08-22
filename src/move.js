@@ -36,6 +36,9 @@ export async function movePage(wiki, context, fromid, to, reason = '', forceRefr
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' && error.text === 'The authorization headers in your request are not valid: Cannot create access token, user did not approve issuing this access token' ) ) {
 					throw context.revoke();
 				}
+				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization-not-approved' ) ) {
+					throw context.revoke('The OAuth consumer has not been approved');
+				}
 				if ( body.errors.some( error => error.code === 'badtoken' ) && !forceRefresh ) {
 					return movePage(wiki, context, fromid, to, reason, true);
 				}

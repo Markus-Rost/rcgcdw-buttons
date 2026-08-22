@@ -275,6 +275,7 @@ async function actions(interaction, wiki, context) {
 	}
 	catch ( error ) {
 		if ( error instanceof RefreshTokenError ) {
+			console.log(`- Asking ${context.userId} for authorization on ${context.site} again: ${error.message}`);
 			return sendButton(interaction, context.userId, context.site, wiki);
 		}
 		throw error;

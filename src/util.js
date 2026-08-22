@@ -237,9 +237,10 @@ export class Context {
 
 	/**
 	 * Revokes the context tokens.
+	 * @param {String} [message]
 	 * @returns {RefreshTokenError}
 	 */
-	revoke() {
+	revoke(message) {
 		console.log( `- Authorization for ${this.userId} on ${this.site} has been revoked.` );
 		db.query( 'DELETE FROM oauthrevert WHERE userid = $1 AND site = $2', [this.userId, this.site] ).then( () => {
 			console.log( `- OAuth2 token for ${this.userId} on ${this.site} successfully deleted.` );
@@ -247,7 +248,7 @@ export class Context {
 			console.log( `- Error while deleting the OAuth2 token for ${this.userId} on ${this.site}: ${dberror}` );
 		} );
 		contextCache.delete(`${this.userId} ${this.site}`);
-		return new RefreshTokenError('Cannot create access token, user did not approve issuing this access token');
+		return new RefreshTokenError(message || 'Cannot create access token, user did not approve issuing this access token');
 	}
 
 	static get _cache() {
