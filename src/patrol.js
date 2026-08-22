@@ -26,7 +26,7 @@ export async function patrolEdit(wiki, context, rcid, forceRefresh = false) {
 		}
 	} ).then( async response => {
 		var body = response.body;
-		if ( response.statusCode !== 200 || !body?.patrol?.rcid === rcid ) {
+		if ( response.statusCode !== 200 || body?.patrol?.rcid !== +rcid ) {
 			if ( body?.errors?.length ) {
 				if ( body.errors.some( error => error.code === 'mwoauth-invalid-authorization' ) && !forceRefresh && await context.refresh(wiki) ) {
 					return patrolEdit(wiki, context, rcid, true);
